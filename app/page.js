@@ -197,7 +197,16 @@ export default function Home() {
     const tM = Object.values(pl).reduce((s, p) => s + p.m, 0);
     const oPct = tM > 0 ? Math.round((tS / tM) * 100) : 0;
     const lvl = getLevel(oPct);
-    await saveAssessment({ pillarScores: pl, overallPct: oPct, level: lvl.name, levelNum: lvl.level });
+    const resultData = { pillarScores: pl, overallPct: oPct, level: lvl.name, levelNum: lvl.level, estado: lvl.estado, paso: lvl.paso };
+    await saveAssessment(resultData);
+    // Send email via API
+    try {
+      await fetch("/api/send-results", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: user.name, email: user.email, company: user.company, results: resultData }),
+      });
+    } catch (e) { console.error("Email error:", e); }
     setSent(true);
     setLoading(false);
   };
@@ -436,7 +445,7 @@ export default function Home() {
                   ))}
                 </div>
                 <button style={{ ...b1, background: "linear-gradient(135deg,#B388FF,#7C4DFF)", width: "100%", fontSize: 16, padding: "16px 32px" }}
-                  onClick={() => window.open("https://infinixe.com", "_blank")}>
+                  onClick={() => window.open("https://calendly.com/infinixe/sesion-con-infinixe-1", "_blank")}>
                   Agendar Consultoría Gratuita →
                 </button>
                 <p style={{ color: "rgba(255,255,255,0.25)", fontSize: 11, textAlign: "center", margin: "12px 0 0" }}>Sin costo · Sin compromiso · 30 minutos con un consultor de innovación</p>
