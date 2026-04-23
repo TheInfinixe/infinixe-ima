@@ -60,29 +60,29 @@ function Donut({v,m,color,size=90}){
 
 function LevelGauge({ pct, levelObj }) {
   const levelColors = ["#FF5252","#FF9800","#FFD740","#69F0AE","#00E5FF","#B388FF"];
-  const cx = 160, cy = 150, r = 110;
+  const cx = 160, cy = 140, r = 105;
   const needleAngle = Math.PI + (pct / 100) * Math.PI;
   return (
     <div style={{ textAlign: "center", padding: "12px 0 4px" }}>
-      <svg width="320" height="190" viewBox="0 0 320 190" style={{ display: "block", margin: "0 auto" }}>
+      <svg width="320" height="160" viewBox="0 0 320 160" style={{ display: "block", margin: "0 auto" }}>
         {LEVELS.map((l, i) => {
           const startA = Math.PI + (i / 6) * Math.PI;
           const endA = Math.PI + ((i + 1) / 6) * Math.PI;
           const x1 = cx + r * Math.cos(startA), y1 = cy + r * Math.sin(startA);
           const x2 = cx + r * Math.cos(endA), y2 = cy + r * Math.sin(endA);
-          return (<path key={i} d={`M ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2}`} fill="none" stroke={levelColors[i]} strokeWidth="20" strokeLinecap="butt" opacity={levelObj.level === i ? 1 : 0.2}/>);
+          return (<path key={i} d={`M ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2}`} fill="none" stroke={levelColors[i]} strokeWidth="18" strokeLinecap="butt" opacity={levelObj.level === i ? 1 : 0.2}/>);
         })}
         {LEVELS.map((l, i) => {
           const midA = Math.PI + ((i + 0.5) / 6) * Math.PI;
-          const lx = cx + (r + 24) * Math.cos(midA), ly = cy + (r + 24) * Math.sin(midA);
-          return (<text key={i} x={lx} y={ly} textAnchor="middle" dominantBaseline="middle" style={{ fill: levelObj.level === i ? "#fff" : "rgba(255,255,255,0.2)", fontSize: 11, fontWeight: levelObj.level === i ? 700 : 400, fontFamily: "inherit" }}>{l.level}</text>);
+          const lx = cx + (r + 22) * Math.cos(midA), ly = cy + (r + 22) * Math.sin(midA);
+          return (<text key={i} x={lx} y={ly} textAnchor="middle" dominantBaseline="middle" style={{ fill: levelObj.level === i ? "#fff" : "rgba(255,255,255,0.2)", fontSize: 10, fontWeight: levelObj.level === i ? 700 : 400, fontFamily: "inherit" }}>{l.level}</text>);
         })}
-        {(() => { const nx = cx + 85 * Math.cos(needleAngle), ny = cy + 85 * Math.sin(needleAngle); return <line x1={cx} y1={cy} x2={nx} y2={ny} stroke="#fff" strokeWidth="3" strokeLinecap="round" style={{ transition: "all 1.2s ease" }}/>; })()}
-        <circle cx={cx} cy={cy} r="6" fill="#fff"/>
-        <text x={cx} y={cy - 28} textAnchor="middle" style={{ fill: "#fff", fontSize: 32, fontWeight: 800, fontFamily: "inherit" }}>{pct}%</text>
+        {(() => { const nx = cx + 78 * Math.cos(needleAngle), ny = cy + 78 * Math.sin(needleAngle); return <line x1={cx} y1={cy} x2={nx} y2={ny} stroke="#fff" strokeWidth="3" strokeLinecap="round" style={{ transition: "all 1.2s ease" }}/>; })()}
+        <circle cx={cx} cy={cy} r="5" fill="#fff"/>
       </svg>
-      <div>
-        <div style={{ fontSize: 10, letterSpacing: 2, color: "rgba(255,255,255,0.4)" }}>NIVEL {levelObj.level}</div>
+      <div style={{ marginTop: 8 }}>
+        <div style={{ fontSize: 36, fontWeight: 800, color: "#fff", lineHeight: 1 }}>{pct}<span style={{ fontSize: 20 }}>%</span></div>
+        <div style={{ fontSize: 10, letterSpacing: 2, color: "rgba(255,255,255,0.4)", marginTop: 6 }}>NIVEL {levelObj.level}</div>
         <div style={{ fontSize: 22, fontWeight: 800, background: "linear-gradient(135deg, #00E5FF, #B388FF)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{levelObj.name}</div>
       </div>
     </div>
@@ -113,6 +113,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [blocked, setBlocked] = useState(false);
   const [regError, setRegError] = useState("");
+  const [accessCode, setAccessCode] = useState("");
 
   const q = QUESTIONS[cQ];
 
@@ -305,9 +306,9 @@ export default function Home() {
           <div style={{ maxWidth: 580, width: "100%", opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(16px)", transition: "all 0.25s ease" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
               <span style={{ fontSize: 10, fontWeight: 700, color: pc, background: `${pc}15`, padding: "3px 10px", borderRadius: 5, letterSpacing: 1.5 }}>{q.pillar}</span>
-              <span style={{ fontSize: 10, color: "rgba(255,255,255,0.2)" }}>›</span>
+              <span style={{ fontSize: 10, color: "rgba(255,255,255,0.2)" }}>·</span>
               <span style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", fontWeight: 600 }}>{q.pilarEs}</span>
-              <span style={{ fontSize: 10, color: "rgba(255,255,255,0.2)" }}>›</span>
+              <span style={{ fontSize: 10, color: "rgba(255,255,255,0.2)" }}>·</span>
               <span style={{ fontSize: 10, color: "rgba(255,255,255,0.35)" }}>{q.subpilar}</span>
             </div>
             <h2 style={{ color: "#fff", fontSize: 18, fontWeight: 600, lineHeight: 1.45, margin: "0 0 6px" }}>{q.q}</h2>
@@ -416,7 +417,7 @@ export default function Home() {
               <div style={{ fontSize: 28, marginBottom: 10 }}>📩</div>
               <h3 style={{ color: "#fff", fontSize: 18, fontWeight: 700, margin: "0 0 6px" }}>Recibe tus resultados</h3>
               <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 13, lineHeight: 1.6, margin: "0 0 20px" }}>
-                Te enviaremos un resumen en PDF con los resultados de esta evaluación beta a <strong style={{ color: "#00E5FF" }}>{user.email}</strong>
+                Te enviaremos un resumen con los resultados de esta evaluación beta a <strong style={{ color: "#00E5FF" }}>{user.email}</strong>
               </p>
               <button style={{ ...b1, opacity: loading ? 0.5 : 1 }} onClick={handleSendResults} disabled={loading}>
                 {loading ? "Guardando..." : "Enviar mis Resultados →"}
@@ -427,29 +428,66 @@ export default function Home() {
               <div style={{ fontSize: 36, marginBottom: 10 }}>✅</div>
               <h3 style={{ color: "#69F0AE", fontSize: 18, fontWeight: 700, margin: "0 0 6px" }}>¡Resultados enviados!</h3>
               <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 13, lineHeight: 1.6, margin: "0 0 24px" }}>
-                Revisa tu correo <strong style={{ color: "#fff" }}>{user.email}</strong> para ver tu resumen en PDF.
+                Revisa tu correo <strong style={{ color: "#fff" }}>{user.email}</strong> para ver tu resumen.
               </p>
+
+              {/* CTA - Unlock potential */}
               <div style={{ ...cd, padding: "24px", textAlign: "left", border: "1px solid rgba(179,136,255,0.2)", background: "linear-gradient(135deg,rgba(179,136,255,0.06),rgba(0,229,255,0.04))" }}>
-                <div style={{ fontSize: 24, marginBottom: 8 }}>🔓</div>
-                <h4 style={{ color: "#B388FF", fontSize: 17, fontWeight: 700, margin: "0 0 10px" }}>Desbloquea el Assessment Completo</h4>
+                <div style={{ fontSize: 24, marginBottom: 8 }}>🚀</div>
+                <h4 style={{ color: "#B388FF", fontSize: 17, fontWeight: 700, margin: "0 0 10px" }}>Desbloquea todo tu potencial</h4>
                 <p style={{ color: "rgba(255,255,255,0.55)", fontSize: 13, lineHeight: 1.7, margin: "0 0 8px" }}>
-                  Esta evaluación beta cubre <strong style={{ color: "#00E5FF" }}>18 preguntas</strong> de una muestra representativa.
-                  El assessment completo evalúa <strong style={{ color: "#00E5FF" }}>36 indicadores en más de 100 preguntas</strong> junto con tu equipo, entregando:
+                  Agenda una consultoría personalizada donde analizaremos a fondo la situación de tu empresa y saldrás con un <strong style={{ color: "#00E5FF" }}>plan de acción inmediato</strong> para empezar a transformar tu negocio.
                 </p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6, margin: "12px 0 16px" }}>
-                  {["Diagnóstico profundo de los 36 indicadores", "Recomendaciones personalizadas por subpilar", "Plan de acción estratégico con tu equipo", "Benchmarking contra +2,000 organizaciones"].map((t, i) => (
+                  {["Diagnóstico profundo y personalizado de tu organización", "Recomendaciones estratégicas según tus necesidades", "Plan de acción accionable e inmediato para tu equipo", "Análisis completo de los 36 indicadores de innovación"].map((t, i) => (
                     <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <span style={{ color: "#69F0AE", fontSize: 14 }}>✓</span>
                       <span style={{ color: "rgba(255,255,255,0.6)", fontSize: 13 }}>{t}</span>
                     </div>
                   ))}
                 </div>
-                <button style={{ ...b1, background: "linear-gradient(135deg,#B388FF,#7C4DFF)", width: "100%", fontSize: 16, padding: "16px 32px" }}
-                  onClick={() => window.open("https://calendly.com/infinixe/sesion-con-infinixe-1", "_blank")}>
-                  Agendar Consultoría Gratuita →
-                </button>
-                <p style={{ color: "rgba(255,255,255,0.25)", fontSize: 11, textAlign: "center", margin: "12px 0 0" }}>Sin costo · Sin compromiso · 30 minutos con un consultor de innovación</p>
+
+                {/* Access code field */}
+                <div style={{ margin: "16px 0 12px" }}>
+                  <label style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginBottom: 6, display: "block" }}>Código de acceso</label>
+                  <input
+                    style={{ ...inp, fontSize: 14, padding: "12px 14px", textAlign: "center", letterSpacing: 2 }}
+                    type="text"
+                    placeholder="Ingresa el código"
+                    value={accessCode}
+                    onChange={e => setAccessCode(e.target.value)}
+                  />
+                </div>
+
+                {accessCode.toLowerCase().trim() === "infinixe" ? (
+                  <>
+                    <button style={{ ...b1, background: "linear-gradient(135deg,#B388FF,#7C4DFF)", width: "100%", fontSize: 16, padding: "16px 32px" }}
+                      onClick={() => window.open("https://calendly.com/infinixe/sesion-con-infinixe-1", "_blank")}>
+                      Agendar Consultoría
+                    </button>
+                    <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 12, textAlign: "center", margin: "10px 0 0", lineHeight: 1.5 }}>
+                      Consultoría personalizada directamente con CEO Infinixe Chris Baumal
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <button style={{ ...b1, background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.4)", width: "100%", fontSize: 15, padding: "14px 32px", cursor: "default" }}
+                      disabled>
+                      Agendar Consultoría
+                    </button>
+                    <p style={{ color: "rgba(255,255,255,0.25)", fontSize: 11, textAlign: "center", margin: "10px 0 0" }}>
+                      Ingresa el código proporcionado para agendar tu consultoría
+                    </p>
+                  </>
+                )}
               </div>
+
+              {/* Finalize button */}
+              <button style={{ ...b1, background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.5)", width: "100%", marginTop: 16, fontSize: 14, padding: "12px 24px", border: "1px solid rgba(255,255,255,0.1)" }}
+                onClick={() => { window.location.reload(); }}>
+                Finalizar
+              </button>
+
               <p style={{ color: "rgba(255,255,255,0.15)", fontSize: 10, marginTop: 20 }}>+2,000 innovadores usan nuestros Frameworks • Zurich • MSC • Agrisal • Audi • FedEx • Conagra</p>
             </div>
           )}
