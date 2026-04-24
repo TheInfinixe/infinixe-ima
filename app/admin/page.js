@@ -113,8 +113,11 @@ export default function AdminDashboard() {
           {loading && <p style={{ textAlign: "center", color: "rgba(255,255,255,0.4)" }}>Cargando datos...</p>}
 
           {/* Table */}
+          <p style={{ fontSize: 11, color: "rgba(255,255,255,0.2)", textAlign: "right", margin: "0 0 6px" }}>← Desliza para ver más →</p>
           {!loading && (
             <div style={{ ...cd, overflow: "hidden" }}>
+              <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+                <div style={{ minWidth: 750 }}>
               {/* Header row */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 80px 80px 70px 100px", padding: "12px 16px", background: "rgba(255,255,255,0.04)", borderBottom: "1px solid rgba(255,255,255,0.08)", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.4)", letterSpacing: 0.5, gap: 8 }}>
                 <span>NOMBRE</span>
@@ -159,6 +162,8 @@ export default function AdminDashboard() {
                   </div>
                 );
               })}
+                </div>
+              </div>
             </div>
           )}
         </div>
