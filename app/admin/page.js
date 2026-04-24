@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { db } from "../../lib/firebase";
-import { collection, getDocs, orderBy, query } from "firebase/firestore";
+import { collection, getDocs, orderBy, query, doc, updateDoc } from "firebase/firestore";
 
 const QUESTIONS = [
   { id:1, pillar:"STRATEGIZE", pilarEs:"DEFINIR", subpilar:"Visión", type:"M", q:"¿La empresa desglosa su visión en destinos estratégicos a corto, mediano y largo plazo bien definidos?", answers:[{text:"No hay objetivos definidos en plazos en la empresa",pts:0},{text:"Es claro lo que la empresa busca a corto plazo",pts:5},{text:"Es claro lo que la empresa busca a mediano plazo",pts:5},{text:"Es claro lo que la empresa busca a largo plazo",pts:5},{text:"La visión de la empresa es coherente en los 3 plazos definidos",pts:5},{text:"Los destinos estratégicos son sostenibles y evitan la obsolescencia",pts:5}]},
@@ -77,8 +77,13 @@ export default function AdminDashboard() {
               <div style={{ fontSize: 10, letterSpacing: 4, color: "rgba(255,255,255,0.3)", marginBottom: 4 }}>INFINIXE IMA</div>
               <h1 style={{ fontSize: 24, fontWeight: 800, margin: 0, color: "#fff" }}>Dashboard de Resultados</h1>
             </div>
-            <div style={{ ...cd, padding: "10px 16px", fontSize: 13, color: "#00E5FF" }}>
-              {assessments.length} participantes
+            <div style={{ display: "flex", gap: 10 }}>
+              <div style={{ ...cd, padding: "10px 16px", fontSize: 13, color: "#00E5FF" }}>
+                {assessments.length} participantes
+              </div>
+              <div style={{ ...cd, padding: "10px 16px", fontSize: 13, color: "#69F0AE" }}>
+                {assessments.filter(a => a.appointmentBooked).length} agendaron
+              </div>
             </div>
           </div>
 
@@ -111,12 +116,13 @@ export default function AdminDashboard() {
           {!loading && (
             <div style={{ ...cd, overflow: "hidden" }}>
               {/* Header row */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 80px 80px 100px", padding: "12px 16px", background: "rgba(255,255,255,0.04)", borderBottom: "1px solid rgba(255,255,255,0.08)", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.4)", letterSpacing: 0.5, gap: 8 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 80px 80px 70px 100px", padding: "12px 16px", background: "rgba(255,255,255,0.04)", borderBottom: "1px solid rgba(255,255,255,0.08)", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.4)", letterSpacing: 0.5, gap: 8 }}>
                 <span>NOMBRE</span>
                 <span>EMAIL</span>
                 <span>EMPRESA</span>
                 <span style={{ textAlign: "center" }}>NIVEL</span>
                 <span style={{ textAlign: "center" }}>PUNTAJE</span>
+                <span style={{ textAlign: "center" }}>AGENDÓ</span>
                 <span style={{ textAlign: "center" }}>FECHA</span>
               </div>
 
@@ -130,11 +136,12 @@ export default function AdminDashboard() {
                 const lvl = a.results?.level || "—";
                 const pct = a.results?.overallPct || 0;
                 const date = a.createdAt?.toDate ? a.createdAt.toDate().toLocaleDateString("es-ES") : "—";
+                const booked = a.appointmentBooked || false;
                 return (
                   <div key={a.id}
                     onClick={() => setSelected(a)}
                     style={{
-                      display: "grid", gridTemplateColumns: "1fr 1fr 1fr 80px 80px 100px", padding: "14px 16px",
+                      display: "grid", gridTemplateColumns: "1fr 1fr 1fr 80px 80px 70px 100px", padding: "14px 16px",
                       borderBottom: "1px solid rgba(255,255,255,0.04)", cursor: "pointer",
                       transition: "background 0.2s", fontSize: 13, alignItems: "center", gap: 8,
                       background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.015)",
@@ -147,6 +154,7 @@ export default function AdminDashboard() {
                     <span style={{ color: "rgba(255,255,255,0.5)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.company || "—"}</span>
                     <span style={{ textAlign: "center", fontSize: 11, fontWeight: 600, color: pct >= 68 ? "#69F0AE" : pct >= 34 ? "#FFD740" : "#FF5252" }}>{lvl}</span>
                     <span style={{ textAlign: "center", fontWeight: 700, color: "#00E5FF", fontFamily: "'Space Mono', monospace" }}>{pct}%</span>
+                    <span style={{ textAlign: "center", fontSize: 14 }}>{booked ? "✅" : "—"}</span>
                     <span style={{ textAlign: "center", fontSize: 11, color: "rgba(255,255,255,0.3)" }}>{date}</span>
                   </div>
                 );
@@ -186,6 +194,49 @@ export default function AdminDashboard() {
               <div style={{ fontSize: 36, fontWeight: 800, color: "#00E5FF" }}>{pct}%</div>
               <div style={{ fontSize: 12, fontWeight: 600, color: pct >= 68 ? "#69F0AE" : pct >= 34 ? "#FFD740" : "#FF5252" }}>{lvl}</div>
             </div>
+          </div>
+        </div>
+
+        {/* Appointment status */}
+        <div style={{ ...cd, padding: "20px 24px", marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, border: a.appointmentBooked ? "1px solid rgba(105,240,174,0.3)" : "1px solid rgba(255,255,255,0.08)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <span style={{ fontSize: 24 }}>{a.appointmentBooked ? "📅" : "🕐"}</span>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: a.appointmentBooked ? "#69F0AE" : "rgba(255,255,255,0.5)" }}>
+                {a.appointmentBooked ? "Consultoría agendada" : "Sin cita agendada"}
+              </div>
+              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.3)" }}>
+                {a.appointmentBooked ? "Este cliente ya tiene cita programada" : "Aún no ha agendado consultoría"}
+              </div>
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button
+              onClick={async (e) => {
+                e.stopPropagation();
+                const newStatus = !a.appointmentBooked;
+                try {
+                  await updateDoc(doc(db, "assessments", a.id), { appointmentBooked: newStatus });
+                  setSelected({ ...a, appointmentBooked: newStatus });
+                  setAssessments(prev => prev.map(x => x.id === a.id ? { ...x, appointmentBooked: newStatus } : x));
+                } catch (err) { console.error("Error updating:", err); }
+              }}
+              style={{
+                background: a.appointmentBooked ? "rgba(255,82,82,0.15)" : "rgba(105,240,174,0.15)",
+                border: a.appointmentBooked ? "1px solid rgba(255,82,82,0.3)" : "1px solid rgba(105,240,174,0.3)",
+                borderRadius: 8, padding: "8px 16px", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+                color: a.appointmentBooked ? "#FF5252" : "#69F0AE",
+              }}>
+              {a.appointmentBooked ? "✕ Desmarcar" : "✓ Marcar como agendada"}
+            </button>
+            <a href="https://calendly.com/infinixe/sesion-con-infinixe-1" target="_blank" rel="noopener noreferrer"
+              style={{
+                background: "rgba(179,136,255,0.15)", border: "1px solid rgba(179,136,255,0.3)",
+                borderRadius: 8, padding: "8px 16px", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit",
+                color: "#B388FF", textDecoration: "none", display: "inline-block",
+              }}>
+              Ver Calendly ↗
+            </a>
           </div>
         </div>
 
