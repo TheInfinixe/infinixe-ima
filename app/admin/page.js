@@ -26,6 +26,46 @@ const QUESTIONS = [
 
 const PILLAR_COLORS = { STRATEGIZE: "#00E5FF", MANAGE: "#B388FF", FEED: "#69F0AE" };
 
+const PILLAR_SUBPILLARS = {
+  STRATEGIZE: ["DEFINIR", "EVALUAR", "INVERTIR"],
+  MANAGE: ["GESTIÓN", "DISEÑO", "TESTEO"],
+  FEED: ["DESARROLLAR", "INVOLUCRAR", "CONECTAR"],
+};
+
+const ALL_CAT = {
+  STRATEGIZE: { DEFINIR: ["Propósito", "Visión", "Why, How & What", "Transformación cultural"], EVALUAR: ["Necesidades del negocio", "Tendencias externas", "Motivaciones clientes", "Recolección y filtrado"], INVERTIR: ["Portafolio", "Presupuesto", "Alianzas"] },
+  MANAGE: { "GESTIÓN": ["Entrada", "Progreso", "Reporteo", "Salida", "Project Management", "Métricas"], "DISEÑO": ["Investigación", "Hipótesis", "Prototipo", "Disrupción", "Pivoteo"], TESTEO: ["Estudio de usuario", "Estudio de mercado", "Estudio técnico", "Experimentación", "Validación"] },
+  FEED: { DESARROLLAR: ["Mapa", "Balance", "Formación", "Innovación"], INVOLUCRAR: ["Dinámicas", "Participación"], CONECTAR: ["Interno", "Externo", "Sustentabilidad"] },
+};
+
+// Unlocked categories (the ones covered by the beta assessment)
+const UNLOCKED_CATS = [...new Set(QUESTIONS.map(q => q.subpilar))];
+
+function Donut({ v, m, color, size = 90 }) {
+  const p = m > 0 ? Math.round((v / m) * 100) : 0, r = (size - 14) / 2, c = 2 * Math.PI * r;
+  return (
+    <svg width={size} height={size} style={{ display: "block" }}>
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="8" />
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth="8" strokeDasharray={c} strokeDashoffset={c - (p / 100) * c} strokeLinecap="round" transform={`rotate(-90 ${size / 2} ${size / 2})`} style={{ transition: "stroke-dashoffset 1.2s ease" }} />
+      <text x={size / 2} y={size / 2} textAnchor="middle" dy="0.35em" style={{ fill: "#fff", fontSize: size * 0.26, fontWeight: 800, fontFamily: "inherit" }}>{p}</text>
+    </svg>
+  );
+}
+
+function CatBar({ label, v, m, color, unlocked }) {
+  const p = m > 0 ? Math.round((v / m) * 100) : 0;
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5 }}>
+      <span style={{ width: 150, textAlign: "right", fontSize: 11, color: unlocked ? "rgba(255,255,255,0.8)" : "rgba(255,255,255,0.25)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</span>
+      <div style={{ flex: 1, height: 16, background: "rgba(255,255,255,0.05)", borderRadius: 4, overflow: "hidden" }}>
+        {unlocked ? <div style={{ width: `${p}%`, height: "100%", background: `linear-gradient(90deg,${color},${color}88)`, borderRadius: 4, minWidth: p > 0 ? 4 : 0 }} />
+          : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 9, color: "rgba(255,255,255,0.2)", letterSpacing: 1.5 }}>🔒 BLOQUEADO</span></div>}
+      </div>
+      {unlocked && <span style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", width: 28, textAlign: "right", fontFamily: "'Space Mono',monospace" }}>{p}%</span>}
+    </div>
+  );
+}
+
 export default function AdminDashboard() {
   const [assessments, setAssessments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -275,6 +315,64 @@ export default function AdminDashboard() {
         )}
 
         {/* Answers detail */}
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: "#fff", marginBottom: 16 }}>Resumen por pilares</h3>
+
+        {/* Visual summary - Donuts */}
+        <div style={{ display: "flex", justifyContent: "center", gap: 28, marginBottom: 24, flexWrap: "wrap" }}>
+          {Object.entries(PILLAR_COLORS).map(([p, c]) => {
+            const ps = a.results?.pillarScores?.[p];
+            return (
+              <div key={p} style={{ textAlign: "center" }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: c, letterSpacing: 2, marginBottom: 6 }}>{p}</div>
+                <Donut v={ps ? ps.s : 0} m={ps ? ps.m : 1} color={c} />
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Visual summary - Category bars per pillar */}
+        {(() => {
+          // Calculate category scores from answers
+          const catScores = {};
+          QUESTIONS.forEach(q => {
+            const sel = getSelectedAnswers(a.answers, q.id, q.type);
+            let pts = 0;
+            sel.forEach(i => { pts += q.answers[i]?.pts || 0; });
+            const mx = q.type === "U" ? Math.max(...q.answers.map(x => x.pts)) : q.answers.reduce((s, x) => s + Math.max(0, x.pts), 0);
+            if (!catScores[q.subpilar]) catScores[q.subpilar] = { s: 0, m: 0 };
+            catScores[q.subpilar].s += pts;
+            catScores[q.subpilar].m += mx;
+          });
+
+          return Object.entries(PILLAR_COLORS).map(([pK, color]) => {
+            const ps = a.results?.pillarScores?.[pK];
+            const ppct = ps ? Math.round((ps.s / ps.m) * 100) : 0;
+            const subpillars = PILLAR_SUBPILLARS[pK] || [];
+            return (
+              <div key={pK} style={{ ...cd, padding: "20px 22px", marginBottom: 16 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: color, letterSpacing: 2 }}>{pK}</span>
+                  <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.05)" }} />
+                  <span style={{ fontSize: 13, fontWeight: 700, color: color, fontFamily: "'Space Mono',monospace" }}>{ppct}%</span>
+                </div>
+                {subpillars.map(spEs => {
+                  const cats = ALL_CAT[pK]?.[spEs] || [];
+                  return (
+                    <div key={spEs} style={{ marginBottom: 14 }}>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.45)", marginBottom: 6, letterSpacing: 1 }}>{spEs}</div>
+                      {cats.map(ct => {
+                        const cs = catScores[ct];
+                        return <CatBar key={ct} label={ct} v={cs ? cs.s : 0} m={cs ? cs.m : 20} color={color} unlocked={UNLOCKED_CATS.includes(ct)} />;
+                      })}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          });
+        })()}
+
+        {/* Detailed answers per question */}
         <h3 style={{ fontSize: 16, fontWeight: 700, color: "#fff", marginBottom: 16 }}>Respuestas detalladas</h3>
 
         {["STRATEGIZE", "MANAGE", "FEED"].map(pillar => {
