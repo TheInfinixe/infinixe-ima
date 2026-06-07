@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { name, email, company, results } = body;
+    const { name, email, company, results, lang } = body;
 
     const levelNames = ["INICIAL", "REACTIVA", "ESTRUCTURADA", "SISTEMATIZADA", "AMBIDIESTRA", "SOSTENIBLE"];
     const levelName = levelNames[results.levelNum] || "INICIAL";
@@ -24,6 +24,7 @@ export async function POST(request) {
       feed_pct: feedPct,
       estado: results.estado,
       paso: results.paso,
+      lang: lang || "es",
     };
 
     const res = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
