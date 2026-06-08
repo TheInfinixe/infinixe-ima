@@ -4,9 +4,12 @@ export async function POST(request) {
   try {
     const body = await request.json();
     const { name, email, company, results, lang } = body;
+    const isEn = lang === "en";
 
-    const levelNames = ["INICIAL", "REACTIVA", "ESTRUCTURADA", "SISTEMATIZADA", "AMBIDIESTRA", "SOSTENIBLE"];
-    const levelName = levelNames[results.levelNum] || "INICIAL";
+    const levelNamesEs = ["INICIAL", "REACTIVA", "ESTRUCTURADA", "SISTEMATIZADA", "AMBIDIESTRA", "SOSTENIBLE"];
+    const levelNamesEn = ["INITIAL", "REACTIVE", "STRUCTURED", "SYSTEMATIZED", "AMBIDEXTROUS", "SUSTAINABLE"];
+    const levelNames = isEn ? levelNamesEn : levelNamesEs;
+    const levelName = levelNames[results.levelNum] || levelNames[0];
 
     const strategizePct = results.pillarScores.STRATEGIZE ? Math.round((results.pillarScores.STRATEGIZE.s / results.pillarScores.STRATEGIZE.m) * 100) : 0;
     const managePct = results.pillarScores.MANAGE ? Math.round((results.pillarScores.MANAGE.s / results.pillarScores.MANAGE.m) * 100) : 0;
@@ -27,12 +30,19 @@ export async function POST(request) {
       lang: lang || "es",
     };
 
+    // Use the English template when the user took the assessment in English
+    // (set EMAILJS_TEMPLATE_ID_EN in the hosting env vars). Falls back to the
+    // Spanish template if no English template is configured.
+    const templateId = isEn && process.env.EMAILJS_TEMPLATE_ID_EN
+      ? process.env.EMAILJS_TEMPLATE_ID_EN
+      : process.env.EMAILJS_TEMPLATE_ID;
+
     const res = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         service_id: process.env.EMAILJS_SERVICE_ID,
-        template_id: process.env.EMAILJS_TEMPLATE_ID,
+        template_id: templateId,
         user_id: process.env.EMAILJS_PUBLIC_KEY,
         template_params: templateParams,
       }),

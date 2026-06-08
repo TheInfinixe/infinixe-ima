@@ -469,12 +469,14 @@ export default function Home() {
     // Stored canonical in Spanish so the admin dashboard stays consistent regardless of user's language.
     const resultData = { pillarScores: pl, overallPct: oPct, level: lvl.name, levelNum: lvl.level, estado: lvl.estado, paso: lvl.paso };
     await saveAssessment(resultData);
+    // For the email, send the description text in the language the user chose.
+    const emailResults = { pillarScores: pl, overallPct: oPct, levelNum: lvl.level, estado: lang === "en" ? lvl.estadoEn : lvl.estado, paso: lang === "en" ? lvl.pasoEn : lvl.paso };
     // Send email via API
     try {
       await fetch("/api/send-results", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: user.name, email: user.email, company: user.company, results: resultData, lang: lang }),
+        body: JSON.stringify({ name: user.name, email: user.email, company: user.company, results: emailResults, lang: lang }),
       });
     } catch (e) { console.error("Email error:", e); }
     setSent(true);
