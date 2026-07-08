@@ -54,12 +54,17 @@ export async function POST(request) {
       }),
     });
 
+    let emailSent = true;
+    let emailError = null;
     if (!res.ok) {
-      const err = await res.text();
-      console.error("EmailJS error:", err);
+      emailSent = false;
+      emailError = await res.text();
+      console.error("EmailJS error:", emailError);
     }
 
-    return NextResponse.json({ success: true });
+    // success stays true so the UI flow (which ignores the body) is unaffected;
+    // emailSent/emailError expose the real EmailJS result for diagnostics.
+    return NextResponse.json({ success: true, emailSent, emailError });
   } catch (error) {
     console.error("API error:", error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
