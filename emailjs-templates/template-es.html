@@ -1,0 +1,120 @@
+<!-- ============================================================
+  INFINIXE IMA - Plantilla de resultados (ESPAÑOL)
+  Pegar en: EmailJS > Email Templates > (template en español) > Code editor
+  Tono: NEUTRO, apto para contacto en frío (sirve para cualquier persona).
+  Variables disponibles: user_name, user_email, company, level_name,
+  level_num, overall_pct, strategize_pct, manage_pct, feed_pct,
+  estado, paso, calendly_url
+  Asunto sugerido:  Tus resultados del Innovation Management Assessment
+  To Email:         {{user_email}}
+============================================================ -->
+<div style="margin:0;padding:0;background:#f4f5f9;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f5f9;padding:24px 0;font-family:Arial,Helvetica,sans-serif;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(10,14,39,0.08);">
+
+          <!-- Header -->
+          <tr>
+            <td style="background:#0a0e27;padding:28px 32px;">
+              <div style="font-size:11px;letter-spacing:5px;color:rgba(255,255,255,0.55);font-weight:bold;">I N F I N I X E</div>
+              <div style="font-size:20px;color:#ffffff;font-weight:bold;margin-top:6px;">Innovation Management Assessment</div>
+            </td>
+          </tr>
+
+          <!-- Intro -->
+          <tr>
+            <td style="padding:32px 32px 8px;">
+              <p style="font-size:16px;color:#0a0e27;margin:0 0 12px;">Hola {{user_name}},</p>
+              <p style="font-size:14px;line-height:1.6;color:#4a4f66;margin:0;">
+                Gracias por completar el <strong>Innovation Management Assessment</strong>. Aquí tienes un resumen del nivel de madurez de innovación que refleja tus respuestas.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Result card -->
+          <tr>
+            <td style="padding:24px 32px 8px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0a0e27;border-radius:12px;">
+                <tr>
+                  <td style="padding:24px 28px;text-align:center;">
+                    <div style="font-size:12px;letter-spacing:2px;color:rgba(255,255,255,0.5);">NIVEL {{level_num}}</div>
+                    <div style="font-size:26px;font-weight:bold;color:#00E5FF;margin:4px 0 2px;">{{level_name}}</div>
+                    <div style="font-size:40px;font-weight:bold;color:#ffffff;line-height:1.1;">{{overall_pct}}<span style="font-size:22px;">%</span></div>
+                    <div style="font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:1px;">MADUREZ GENERAL</div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Pillars -->
+          <tr>
+            <td style="padding:16px 32px 8px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td width="33%" style="text-align:center;padding:8px;">
+                    <div style="font-size:11px;font-weight:bold;color:#00E5FF;letter-spacing:1px;">STRATEGIZE</div>
+                    <div style="font-size:22px;font-weight:bold;color:#0a0e27;">{{strategize_pct}}%</div>
+                  </td>
+                  <td width="33%" style="text-align:center;padding:8px;">
+                    <div style="font-size:11px;font-weight:bold;color:#B388FF;letter-spacing:1px;">MANAGE</div>
+                    <div style="font-size:22px;font-weight:bold;color:#0a0e27;">{{manage_pct}}%</div>
+                  </td>
+                  <td width="33%" style="text-align:center;padding:8px;">
+                    <div style="font-size:11px;font-weight:bold;color:#69F0AE;letter-spacing:1px;">FEED</div>
+                    <div style="font-size:22px;font-weight:bold;color:#0a0e27;">{{feed_pct}}%</div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Estado -->
+          <tr>
+            <td style="padding:16px 32px 4px;">
+              <div style="border-left:3px solid #00E5FF;padding:4px 0 4px 14px;">
+                <div style="font-size:13px;font-weight:bold;color:#0a0e27;margin-bottom:4px;">Estado actual de la innovación</div>
+                <div style="font-size:14px;line-height:1.6;color:#4a4f66;">{{estado}}</div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Paso -->
+          <tr>
+            <td style="padding:12px 32px 8px;">
+              <div style="border-left:3px solid #69F0AE;padding:4px 0 4px 14px;">
+                <div style="font-size:13px;font-weight:bold;color:#0a0e27;margin-bottom:4px;">El siguiente paso estratégico</div>
+                <div style="font-size:14px;line-height:1.6;color:#4a4f66;">{{paso}}</div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- CTA -->
+          <tr>
+            <td style="padding:28px 32px 8px;text-align:center;">
+              <p style="font-size:14px;line-height:1.6;color:#4a4f66;margin:0 0 16px;">
+                ¿Quieres analizar estos resultados a fondo y salir con un plan de acción concreto? Agenda una conversación con nuestro equipo, sin costo.
+              </p>
+              <a href="{{calendly_url}}" style="display:inline-block;background:#00E5FF;color:#0a0e27;text-decoration:none;font-weight:bold;font-size:15px;padding:14px 32px;border-radius:10px;">
+                Agendar una conversación
+              </a>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:28px 32px;border-top:1px solid #ececf2;margin-top:16px;">
+              <p style="font-size:12px;line-height:1.6;color:#9096ad;margin:0;">
+                Este resumen corresponde a la versión beta del assessment. Si tienes preguntas, escríbenos a
+                <a href="mailto:Hello@infinixe.co" style="color:#00B8D4;text-decoration:none;">Hello@infinixe.co</a>.
+              </p>
+              <p style="font-size:11px;color:#c2c6d6;margin:10px 0 0;letter-spacing:3px;">I N F I N I X E</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</div>

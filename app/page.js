@@ -171,7 +171,7 @@ const QUESTIONS = [
       {text:"Realizan sesiones de ideación para la resolución de retos dentro de las áreas", textEn:"Ideation sessions are held to solve challenges within the areas", pts:4},
       {text:"Existen promotores que fomenten la creatividad", textEn:"There are champions who foster creativity", pts:4},
       {text:"Los líderes en la organización propician la creatividad", textEn:"Leaders in the organization encourage creativity", pts:5}]},
-  { id:15, pillar:"FEED", pilarEs:"INVOLUCRAR", subpilar:"Dinámicas", type:"U",
+  { id:15, pillar:"FEED", pilarEs:"INVOLUCRAR", subpilar:"Dinámicas", type:"M",
     q:"¿Utilizan dinámicas de equipos para innovar internamente?",
     qEn:"Do you use team activities to innovate internally?",
     answers:[
@@ -180,7 +180,7 @@ const QUESTIONS = [
       {text:"Se realizan talleres para hablar de innovación e inspirarse", textEn:"Workshops are held to talk about innovation and get inspired", pts:6},
       {text:"Se realizan talleres para saber hacer innovación detectando y resolviendo necesidades", textEn:"Workshops are held to learn how to innovate by detecting and solving needs", pts:6},
       {text:"Se realizan talleres para saber detectar tendencias y reinventar soluciones existentes", textEn:"Workshops are held to learn to spot trends and reinvent existing solutions", pts:6}]},
-  { id:16, pillar:"FEED", pilarEs:"INVOLUCRAR", subpilar:"Dinámicas", type:"U",
+  { id:16, pillar:"FEED", pilarEs:"INVOLUCRAR", subpilar:"Dinámicas", type:"M",
     q:"¿Utilizan dinámicas organizacionales para innovar en retos específicos?",
     qEn:"Do you use organization-wide activities to innovate on specific challenges?",
     answers:[

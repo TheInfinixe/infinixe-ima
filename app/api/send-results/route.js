@@ -28,6 +28,8 @@ export async function POST(request) {
       estado: results.estado,
       paso: results.paso,
       lang: lang || "es",
+      // CTA link for the neutral cold-outreach template
+      calendly_url: "https://calendly.com/infinixe/sesion-con-infinixe-1",
     };
 
     // Use the English template when the user took the assessment in English
@@ -44,6 +46,10 @@ export async function POST(request) {
         service_id: process.env.EMAILJS_SERVICE_ID,
         template_id: templateId,
         user_id: process.env.EMAILJS_PUBLIC_KEY,
+        // Required for server-side (non-browser) sends. Set EMAILJS_PRIVATE_KEY
+        // in the hosting env vars (Vercel) and enable "Allow EmailJS API for
+        // non-browser applications" in the EmailJS account settings.
+        accessToken: process.env.EMAILJS_PRIVATE_KEY,
         template_params: templateParams,
       }),
     });
