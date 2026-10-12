@@ -9,19 +9,26 @@ const montserrat = Montserrat({ subsets: ["latin"], weight: ["400", "500", "600"
 const staatliches = Staatliches({ subsets: ["latin"], weight: "400", display: "swap" });
 
 // ─── CONFIGURABLES ────────────────────────────────────────────────────────────
-// ID del video de YouTube del VSL. Si está vacío, se muestra un placeholder.
-const VIDEO_ID = process.env.NEXT_PUBLIC_VSL_VIDEO_ID || "";
+// Prioridad del video: 1) URL directa MP4 (Vercel Blob u otro CDN) -> <video> nativo.
+//                      2) ID de YouTube -> iframe.  3) vacío -> placeholder.
+const VIDEO_SRC = process.env.NEXT_PUBLIC_VSL_VIDEO_SRC || "";    // p.ej. https://xxxx.public.blob.vercel-storage.com/vsl/vsl-julio.mp4
+const VIDEO_POSTER = process.env.NEXT_PUBLIC_VSL_VIDEO_POSTER || ""; // opcional: imagen de portada
+const VIDEO_ID = process.env.NEXT_PUBLIC_VSL_VIDEO_ID || "";      // ID de YouTube (fallback)
 // Segundos antes de revelar la oferta + botón de pago (default 120s). ?cta=1 la muestra de inmediato.
 const CTA_DELAY_SECONDS = parseInt(process.env.NEXT_PUBLIC_VSL_CTA_DELAY || "120", 10);
 
 // ─── PALETA ───────────────────────────────────────────────────────────────────
 const C = {
-  bg: "#170f40",
-  indigo: "#342b7f",
-  mint: "#6ceecc",
-  purple: "#8956ff",
-  cyan: "#0ac6f9",
+  bg: "#170f40",      // --dark / --ink
+  dark2: "#241a5e",   // --dark-2
+  indigo: "#342b7f",  // --purple
+  mint: "#6ceecc",    // --mint-soft
+  purple: "#8956ff",  // --violet
+  blue: "#4fa8ff",    // mid-stop del gradiente firma
+  cyan: "#0ac6f9",    // --cyan
 };
+// Gradiente firma de la marca (igual que el CTA de ima.infinixe.co)
+const BRAND_GRADIENT = `linear-gradient(92deg, ${C.cyan}, ${C.blue} 55%, ${C.purple})`;
 
 const STACK = [
   "Diagnóstico completo de los 3 pilares — las 36 categorías, incluidas las que viste bloqueadas 🔒",
@@ -57,7 +64,7 @@ function VslContent({ price, stripeUrl, variant }) {
     <div
       className={montserrat.className}
       data-variant={variant}
-      style={{ minHeight: "100vh", background: C.bg, color: "#fff", display: "flex", flexDirection: "column" }}
+      style={{ minHeight: "100vh", background: `radial-gradient(900px 520px at 50% -6%, rgba(137,86,255,0.22), transparent 60%), radial-gradient(760px 520px at 50% 104%, rgba(10,198,249,0.12), transparent 55%), ${C.bg}`, color: "#fff", display: "flex", flexDirection: "column" }}
     >
       <style>{`
         @keyframes vslReveal {
@@ -66,7 +73,7 @@ function VslContent({ price, stripeUrl, variant }) {
         }
         .vsl-reveal { animation: vslReveal 0.7s ease both; }
         .vsl-cta-btn { transition: transform 0.15s ease, box-shadow 0.15s ease; }
-        .vsl-cta-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(108,238,204,0.35); }
+        .vsl-cta-btn:hover { transform: translateY(-2px); box-shadow: 0 18px 38px rgba(137,86,255,0.45); }
       `}</style>
 
       <main style={{ flex: 1, width: "100%", maxWidth: 720, margin: "0 auto", padding: "32px 20px 48px" }}>
@@ -94,7 +101,7 @@ function VslContent({ price, stripeUrl, variant }) {
             position: "relative",
             width: "100%",
             aspectRatio: "16 / 9",
-            borderRadius: 14,
+            borderRadius: 18,
             overflow: "hidden",
             border: `1px solid ${C.indigo}`,
             background: "linear-gradient(135deg, rgba(52,43,127,0.55), rgba(23,15,64,0.9))",
@@ -102,7 +109,16 @@ function VslContent({ price, stripeUrl, variant }) {
             marginBottom: 36,
           }}
         >
-          {VIDEO_ID ? (
+          {VIDEO_SRC ? (
+            <video
+              src={VIDEO_SRC}
+              poster={VIDEO_POSTER || undefined}
+              controls
+              playsInline
+              preload="metadata"
+              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: 0, background: "#000", objectFit: "cover" }}
+            />
+          ) : VIDEO_ID ? (
             <iframe
               src={`https://www.youtube-nocookie.com/embed/${VIDEO_ID}?rel=0&modestbranding=1`}
               title="Tu resultado explicado — Infinixe"
@@ -131,9 +147,12 @@ function VslContent({ price, stripeUrl, variant }) {
             <div
               style={{
                 border: `1.5px solid ${C.indigo}`,
-                borderRadius: 16,
+                borderRadius: 22,
                 padding: "28px 22px",
-                background: "linear-gradient(160deg, rgba(52,43,127,0.28), rgba(23,15,64,0.6))",
+                background: "linear-gradient(160deg, rgba(52,43,127,0.32), rgba(23,15,64,0.62))",
+                backdropFilter: "blur(14px)",
+                WebkitBackdropFilter: "blur(14px)",
+                boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
               }}
             >
               <h2
@@ -180,14 +199,15 @@ function VslContent({ price, stripeUrl, variant }) {
                 style={{
                   display: "block",
                   textAlign: "center",
-                  background: C.mint,
-                  color: C.bg,
+                  background: BRAND_GRADIENT,
+                  color: "#fff",
                   fontWeight: 800,
                   fontSize: 17,
                   padding: "17px 24px",
                   borderRadius: 12,
                   textDecoration: "none",
                   letterSpacing: 0.3,
+                  boxShadow: "0 14px 30px rgba(137,86,255,0.3)",
                 }}
               >
                 Desbloquear mi IMA Completo →
