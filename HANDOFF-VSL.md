@@ -121,6 +121,29 @@ NEXT_PUBLIC_VSL_VIDEO_SRC=https://<hash>.public.blob.vercel-storage.com/vsl-juli
 
 ---
 
+## Cómo terminarlo con Claude Code (opción asistida)
+
+Si quieres que Claude te ayude a ejecutar esto paso a paso:
+
+1. Abre **este repo** en Claude Code (app de escritorio *Code*, el CLI `claude`, o claude.ai/code).
+2. Cámbiate a la rama del PR:
+   ```bash
+   git checkout vsl/diseno-y-video
+   ```
+3. Ten listos: sesión iniciada en el **Vercel** que despliega `infinixe-ima.vercel.app` (o el `BLOB_READ_WRITE_TOKEN`), el archivo **`vsl julio.mp4`** descargado en tu máquina, y los **links de Stripe**.
+4. Pega este prompt:
+
+> Estoy terminando el VSL de Infinixe. Lee `HANDOFF-VSL.md` en la raíz del repo (tiene contexto y checklist) y ayúdame a:
+> 1. Subir el video `vsl julio.mp4` (lo tengo local en `<ruta>`) a **Vercel Blob** del proyecto `infinixe-ima` y poner su URL pública en la env var `NEXT_PUBLIC_VSL_VIDEO_SRC` (Production + Preview).
+> 2. Configurar las env vars de **Stripe** `NEXT_PUBLIC_STRIPE_LINK_450` y `NEXT_PUBLIC_STRIPE_LINK_350` (te paso los links).
+> 3. Verificar `/vsl` y `/vsl-b` en local y en el preview, y redeployar.
+>
+> Tengo acceso a la cuenta de Vercel de `infinixe-ima` y a Stripe. Guíame paso a paso y dime qué necesitas de mí.
+
+**Qué va a necesitar Claude de ti** (no lo puede hacer solo): tu login de Vercel o el `BLOB_READ_WRITE_TOKEN`, el MP4 local, y los links de Stripe. El resto (subida, env vars, cablear y verificar) lo hace él.
+
+---
+
 ## Notas de consistencia visual
 
 - La VSL quedó alineada con la **landing** (`ima.infinixe.co`): Montserrat + Staatliches, cian `#0AC6F9`, violeta `#8956FF`, mint `#6CEECC`, fondo `#170F40`, botón gradiente firma.
