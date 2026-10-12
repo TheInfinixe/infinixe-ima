@@ -1,150 +1,99 @@
-# Handoff — Terminar el VSL (Infinixe IMA)
+# Handoff — VSL del IMA (Infinixe)
 
-Documento para unificar el VSL en el Vercel del **IMA beta** (`infinixe-ima.vercel.app`).
-Todo el trabajo visual ya está hecho y alineado con la marca (`ima.infinixe.co`). Faltan **3 cosas operativas**: traer el cambio de código, subir el video y poner los links de Stripe.
-
----
-
-## TL;DR — 3 tareas
-
-1. **Código:** hacer merge/push de `app/vsl/VslPage.js` a `main` (repo `TheInfinixe/infinixe-ima`). Vercel redeploya solo.
-2. **Video:** subir `vsl julio.mp4` (332 MB) a Vercel Blob **en el team que es dueño de `infinixe-ima`** y poner su URL pública en la env var `NEXT_PUBLIC_VSL_VIDEO_SRC`.
-3. **Stripe:** poner los 2 links de pago en `NEXT_PUBLIC_STRIPE_LINK_450` y `NEXT_PUBLIC_STRIPE_LINK_350`.
+Estado del VSL y lo que falta para unificar todo el funnel con la landing principal (`ima.infinixe.co`).
 
 ---
 
-## Contexto
+## Estado actual
 
-- **Qué es el VSL:** la página que ve el usuario **después del assessment**, explica su resultado y vende el "IMA Completo + sesión 1:1".
-- **Rutas:**
-  - `/vsl` → variante A, **$450** (`NEXT_PUBLIC_STRIPE_LINK_450`)
-  - `/vsl-b` → variante B, **$350** (`NEXT_PUBLIC_STRIPE_LINK_350`)
-  - Ambas comparten el mismo componente: `app/vsl/VslPage.js`.
-- **Funnel completo (ya funciona):**
-  `anuncio` → `ima.infinixe.co` (landing) → `infinixe-ima.vercel.app` (assessment) → pantalla de resultados → botón **"Qué significa tu resultado →"** → `/vsl?lvl=<nivel>&n=<nombre>`.
-  (El botón está en `app/page.js`, ~línea 744. La VSL lee `n` y `lvl` para personalizar el título.)
+| Tema | Estado |
+|---|---|
+| Diseño del VSL alineado con la marca (landing) | ✅ Hecho (`app/vsl/VslPage.js`) |
+| Video en Vercel Blob (H.264, compatible con todos los navegadores) | ✅ Hecho |
+| Env var `NEXT_PUBLIC_VSL_VIDEO_SRC` (Production + Preview) | ✅ Configurada |
+| Links de Stripe `_450` / `_350` | ✅ Ya configurados en Vercel (Production + Preview) |
+| Oferta a los 2:00 (`NEXT_PUBLIC_VSL_CTA_DELAY`, default 120 s) | ✅ Confirmado, sin cambios |
+| Pasar a producción (merge del PR a `main`) | ⏳ Pendiente |
+| Unificar con la landing principal `ima.infinixe.co` | ⏳ Pendiente (ver abajo) |
+
+---
+
+## Dónde vive cada cosa
+
 - **Repo:** `github.com/TheInfinixe/infinixe-ima` (branch `main`).
-- **Deploy:** `infinixe-ima.vercel.app`.
+- **Vercel:** team `isabel-plyg's projects` → proyecto **`infinixe-ima`** → dominio `infinixe-ima.vercel.app`.
+  Se despliega solo desde GitHub: push a `main` = producción, cualquier otra rama = Preview.
+- **Video:** Blob store `infinixe-vsl-video` (público, conectado a `infinixe-ima`).
+  URL: `https://isclmsuyunbjrocp.public.blob.vercel-storage.com/vsl/vsl-julio-h264.mp4`
+  Original en Drive: <https://drive.google.com/file/d/1ZPaWK5GCHTThiadvxmh0Z_6SgyqkhcR2/view>
+- **Landing principal:** `ima.infinixe.co` — **no** está en este Vercel. Sus botones "Assessment gratuito" llevan a `https://infinixe-ima.vercel.app/?utm_source=ima-landing&utm_medium=referral&utm_campaign=ima&cta=<nav|hero|final>`.
+
+## Funnel actual
+
+`anuncio` → `ima.infinixe.co` (landing) → `infinixe-ima.vercel.app` (assessment) → resultados → botón **"Qué significa tu resultado →"** → `/vsl?lvl=<nivel>&n=<nombre>` → botón de pago → Stripe.
+
+- Rutas del VSL: `/vsl` (variante A, $450) y `/vsl-b` (variante B, $350). Ambas usan `app/vsl/VslPage.js`.
+- El botón de resultados está en `app/page.js` (~línea 744).
+- El email de resultados también enlaza al VSL usando `NEXT_PUBLIC_VSL_URL` (default `https://infinixe-ima.vercel.app/vsl`).
 
 ---
 
-## 1. Cambio de código (diseño + reproductor flexible)
+## Pendiente 1 — Pasar a producción
 
-**Archivo tocado (uno solo):** `app/vsl/VslPage.js`
+Mergear el PR **TheInfinixe/infinixe-ima#1** a `main`. Vercel redespliega `infinixe-ima.vercel.app` automáticamente. Después verificar en producción `/vsl?cta=1` y `/vsl-b?cta=1`: video con imagen y sonido, oferta visible, botón va a Stripe.
 
-**Qué cambió:**
-- **Consistencia con la marca/landing** (`ima.infinixe.co`): el botón CTA pasó de mint plano al **gradiente firma** `linear-gradient(92deg,#0AC6F9,#4FA8FF 55%,#8956FF)` con texto blanco + glow violeta; cards con glass (blur) y radios de 22px; glow radial de fondo. Tipografías (Montserrat + Staatliches) y paleta ya coincidían.
-- **Reproductor de video flexible:** ahora elige la fuente por env var, en este orden:
-  1. `NEXT_PUBLIC_VSL_VIDEO_SRC` → `<video>` nativo (MP4 directo, p. ej. Vercel Blob). **← lo que vamos a usar**
-  2. `NEXT_PUBLIC_VSL_VIDEO_ID` → iframe de YouTube (fallback).
-  3. Si ambas están vacías → placeholder "Video próximamente".
+## Pendiente 2 — Unificar con la landing principal (`ima.infinixe.co`)
 
-**Acción:** merge/push de ese archivo a `main`. Vercel redeploya automático. No hay cambios de dependencias.
+Por definir con el equipo antes de implementar:
 
----
-
-## 2. Video — `vsl julio.mp4` (332 MB)
-
-Archivo original en Drive: <https://drive.google.com/file/d/1ZPaWK5GCHTThiadvxmh0Z_6SgyqkhcR2/view>
-
-> Importante: el MP4 pesa 332 MB — **no meterlo en el repo / `public`** (bloatea el deploy). Hay que hostearlo en un CDN. Recomendado: **Vercel Blob** en el MISMO team que es dueño del proyecto `infinixe-ima` (así la env var y el token quedan en el mismo lugar).
-
-### Opción recomendada — Vercel Blob
-
-1. Vercel → proyecto **`infinixe-ima`** → pestaña **Storage** → **Create Database → Blob** → crear y **conectarlo al proyecto** (esto agrega `BLOB_READ_WRITE_TOKEN` a las env vars del proyecto automáticamente).
-2. Subir el MP4:
-   - **Fácil (dashboard):** abrir el Blob store → **Upload** → subir `vsl julio.mp4` → copiar su **public URL**.
-   - **O por CLI (logueado):**
-     ```bash
-     vercel blob put "vsl julio.mp4" --rw-token <BLOB_READ_WRITE_TOKEN>
-     ```
-3. La URL pública se ve así:
-   `https://<hash>.public.blob.vercel-storage.com/vsl-julio.mp4`
-4. Poner esa URL en la env var **`NEXT_PUBLIC_VSL_VIDEO_SRC`** (Production + Preview) y redeploy.
-
-### Alternativa — YouTube no listado
-Subir el MP4 a YouTube como "no listado" y poner el ID en **`NEXT_PUBLIC_VSL_VIDEO_ID`**. (El código ya lo soporta como fallback.)
-
-### (Opcional) Portada del video
-`NEXT_PUBLIC_VSL_VIDEO_POSTER` = URL de una imagen de portada. Si se omite, el `<video>` muestra el primer frame.
+1. **Dominio:** ¿el assessment y el VSL siguen en `infinixe-ima.vercel.app`, o se sirven bajo el dominio de la marca (p. ej. un subdominio tipo `assessment.infinixe.co` apuntando al proyecto `infinixe-ima`, o una ruta dentro de `ima.infinixe.co`)?
+   - Si cambia el dominio: actualizar los botones de la landing y la env var `NEXT_PUBLIC_VSL_URL` (CTA del email).
+2. **Atribución (UTMs):** la landing manda `utm_source/utm_medium/utm_campaign/cta` al assessment, pero hoy **se pierden** al pasar de resultados al VSL (el botón solo pasa `lvl` y `n`) y por lo tanto no llegan a Stripe. Si se quiere medir qué anuncio vende, hay que propagarlos hasta el VSL y el link de pago.
+3. **Consistencia visual:** el VSL y la landing usan Montserrat + `#0AC6F9` / `#8956FF`. El assessment usa una variante (Outfit, `#00E5FF` / `#B388FF`). Si se quiere que todo el funnel se vea idéntico, alinear también el assessment.
 
 ---
 
-## 3. Env vars a configurar en Vercel (proyecto `infinixe-ima`)
+## Video — notas técnicas
 
-| Variable | Valor | Notas |
-|---|---|---|
-| `NEXT_PUBLIC_VSL_VIDEO_SRC` | URL pública del MP4 en Blob | Fuente principal del video |
-| `NEXT_PUBLIC_VSL_VIDEO_POSTER` | *(opcional)* URL de portada | — |
-| `NEXT_PUBLIC_VSL_VIDEO_ID` | *(opcional)* ID de YouTube | Solo si NO se usa Blob |
-| `NEXT_PUBLIC_VSL_CTA_DELAY` | `120` | Segundos antes de mostrar la oferta. `?cta=1` la muestra de inmediato |
-| `NEXT_PUBLIC_STRIPE_LINK_450` | link de pago Stripe $450 | Botón de `/vsl` |
-| `NEXT_PUBLIC_STRIPE_LINK_350` | link de pago Stripe $350 | Botón de `/vsl-b` |
-| `NEXT_PUBLIC_VSL_URL` | `https://infinixe-ima.vercel.app/vsl` | Usado por el email de resultados para el CTA. Cambiar si hay dominio propio |
+- **Debe ser H.264.** El original venía en **HEVC/H.265** (formato de iPhone): en Chrome/Edge de Windows **solo se escuchaba, sin imagen**. Se re-codificó a H.264 1080p30 (audio AAC copiado sin pérdida) con `faststart` para que empiece a reproducir sin descargar todo.
+- Si se reemplaza el video, re-codificar así antes de subirlo:
+  ```bash
+  ffmpeg -i entrada.mp4 -c:v libx264 -preset slow -crf 22 -maxrate 5M -bufsize 10M -profile:v high -pix_fmt yuv420p -c:a aac -b:a 160k -movflags +faststart salida.mp4
+  ```
+- Subirlo con un **nombre nuevo** (el CDN cachea 30 días por URL) y actualizar `NEXT_PUBLIC_VSL_VIDEO_SRC`:
+  ```bash
+  vercel blob put salida.mp4 --access public --pathname vsl/<nombre-nuevo>.mp4 --rw-token <BLOB_READ_WRITE_TOKEN>
+  ```
+- El reproductor (`VslPage.js`) elige la fuente en este orden: `NEXT_PUBLIC_VSL_VIDEO_SRC` (MP4 directo) → `NEXT_PUBLIC_VSL_VIDEO_ID` (YouTube) → placeholder.
 
-> Son todas `NEXT_PUBLIC_*` (se leen en el cliente) → **requieren redeploy** para tomar efecto.
+## Env vars del proyecto `infinixe-ima` (relacionadas al VSL)
 
----
+| Variable | Valor / estado |
+|---|---|
+| `NEXT_PUBLIC_VSL_VIDEO_SRC` | URL del MP4 en Blob ✅ |
+| `NEXT_PUBLIC_STRIPE_LINK_450` | Link Stripe $450 ✅ |
+| `NEXT_PUBLIC_STRIPE_LINK_350` | Link Stripe $350 ✅ |
+| `NEXT_PUBLIC_VSL_CTA_DELAY` | No definida → usa 120 s (2:00) ✅ |
+| `NEXT_PUBLIC_VSL_URL` | No definida → usa `https://infinixe-ima.vercel.app/vsl`. Cambiar si cambia el dominio |
+| `BLOB_READ_WRITE_TOKEN` | Creada por Vercel al conectar el Blob store ✅ |
 
-## 4. Stripe (pendiente)
-
-Los links de pago están vacíos → hoy el botón "Desbloquear mi IMA Completo" apunta a `#` (no cobra).
-Crear/usar los **Payment Links** de Stripe (uno de $450 y uno de $350) y ponerlos en las env vars de arriba.
-
----
+Son `NEXT_PUBLIC_*` → cualquier cambio requiere redeploy.
 
 ## Probar en local
 
 ```bash
 npm install
 npm run dev
-# abrir http://localhost:3000/vsl?cta=1   (cta=1 muestra la oferta de inmediato)
-# variante B: http://localhost:3000/vsl-b?cta=1
+# http://localhost:3000/vsl?cta=1   (cta=1 muestra la oferta de inmediato)
 ```
-
-Para probar el video en local sin Blob, crear `.env.local` con:
-```
-NEXT_PUBLIC_VSL_VIDEO_SRC=https://<hash>.public.blob.vercel-storage.com/vsl-julio.mp4
-```
+Para ver el video en local, agregar a `.env.local`: `NEXT_PUBLIC_VSL_VIDEO_SRC=<URL del video>`.
 
 ---
 
-## Checklist final
+## Continuar con Claude Code
 
-- [ ] Merge/push de `app/vsl/VslPage.js` a `main`.
-- [ ] Blob store creado y conectado a `infinixe-ima` (o video en YouTube).
-- [ ] `vsl julio.mp4` subido → URL pública obtenida.
-- [ ] `NEXT_PUBLIC_VSL_VIDEO_SRC` configurada en Vercel.
-- [ ] `NEXT_PUBLIC_STRIPE_LINK_450` y `_350` configuradas.
-- [ ] `NEXT_PUBLIC_VSL_CTA_DELAY` = 120 (o el valor acordado).
-- [ ] Redeploy y verificar `/vsl` y `/vsl-b` (video reproduce, oferta aparece, botón va a Stripe).
+Abrir este repo en Claude Code y pegar:
 
----
+> Lee `HANDOFF-VSL.md` en la raíz del repo. Quiero avanzar con el "Pendiente 2 — Unificar con la landing principal". Ayúdame a definir y ejecutar los cambios de dominio, la propagación de UTMs hasta Stripe y la alineación visual del assessment. Pregúntame lo que necesites antes de cambiar algo.
 
-## Cómo terminarlo con Claude Code (opción asistida)
-
-Si quieres que Claude te ayude a ejecutar esto paso a paso:
-
-1. Abre **este repo** en Claude Code (app de escritorio *Code*, el CLI `claude`, o claude.ai/code).
-2. Cámbiate a la rama del PR:
-   ```bash
-   git checkout vsl/diseno-y-video
-   ```
-3. Ten listos: sesión iniciada en el **Vercel** que despliega `infinixe-ima.vercel.app` (o el `BLOB_READ_WRITE_TOKEN`), el archivo **`vsl julio.mp4`** descargado en tu máquina, y los **links de Stripe**.
-4. Pega este prompt:
-
-> Estoy terminando el VSL de Infinixe. Lee `HANDOFF-VSL.md` en la raíz del repo (tiene contexto y checklist) y ayúdame a:
-> 1. Subir el video `vsl julio.mp4` (lo tengo local en `<ruta>`) a **Vercel Blob** del proyecto `infinixe-ima` y poner su URL pública en la env var `NEXT_PUBLIC_VSL_VIDEO_SRC` (Production + Preview).
-> 2. Configurar las env vars de **Stripe** `NEXT_PUBLIC_STRIPE_LINK_450` y `NEXT_PUBLIC_STRIPE_LINK_350` (te paso los links).
-> 3. Verificar `/vsl` y `/vsl-b` en local y en el preview, y redeployar.
->
-> Tengo acceso a la cuenta de Vercel de `infinixe-ima` y a Stripe. Guíame paso a paso y dime qué necesitas de mí.
-
-**Qué va a necesitar Claude de ti** (no lo puede hacer solo): tu login de Vercel o el `BLOB_READ_WRITE_TOKEN`, el MP4 local, y los links de Stripe. El resto (subida, env vars, cablear y verificar) lo hace él.
-
----
-
-## Notas de consistencia visual
-
-- La VSL quedó alineada con la **landing** (`ima.infinixe.co`): Montserrat + Staatliches, cian `#0AC6F9`, violeta `#8956FF`, mint `#6CEECC`, fondo `#170F40`, botón gradiente firma.
-- El **assessment** (`infinixe-ima.vercel.app`) usa una variante levemente distinta (tipografía **Outfit**, cian `#00E5FF`, violeta `#B388FF`). Si se quiere que landing + assessment + VSL calcen al 100%, habría que alinear también el assessment a Montserrat + `#0AC6F9`. (Fuera del alcance de este cambio.)
+Para tocar Vercel desde la terminal: `vercel login` con la cuenta del team `isabel-plyg's projects`.
