@@ -6,13 +6,20 @@ import { NextResponse } from "next/server";
 // también si vuelve desde el link del correo en el mismo navegador.
 // La URL visible sigue siendo /vsl en ambos casos.
 // Para probar una variante a mano: /vsl?v=a  o  /vsl?v=b
+// Para terminar el test sin tocar código: env var VSL_FORCE_VARIANT=a (o b) en Vercel + redeploy.
 const COOKIE = "vsl_variant";
 const NINETY_DAYS = 60 * 60 * 24 * 90;
 
 export function middleware(request) {
   const { searchParams } = request.nextUrl;
+  const winner = process.env.VSL_FORCE_VARIANT;
   const forced = searchParams.get("v");
-  let variant = forced === "a" || forced === "b" ? forced : request.cookies.get(COOKIE)?.value;
+  let variant =
+    winner === "a" || winner === "b"
+      ? winner
+      : forced === "a" || forced === "b"
+        ? forced
+        : request.cookies.get(COOKIE)?.value;
   if (variant !== "a" && variant !== "b") variant = Math.random() < 0.5 ? "a" : "b";
 
   const response =
