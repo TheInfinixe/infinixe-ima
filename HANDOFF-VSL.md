@@ -4,6 +4,13 @@
 Todo el sistema pasa a las cuentas de Chris. Este es el **documento maestro**: explica cómo funciona todo, dónde vive cada cosa y qué hay que hacer para dejarlo funcionando. El IMA Completo tiene además su propio documento técnico: `HANDOFF.md` en su repo.
 
 > **Cómo usarlo con Claude Code:** abrir este repo y pegar el prompt de la §16.
+>
+> **Entrega en Google Drive** (unidad compartida *Infinixe › PlayGround › IMA*):
+> - Guía de usuario (Word).
+> - Credenciales y accesos (Word, confidencial).
+> - PDF del cuestionario.
+> - Código QR.
+> - Excel de resultados del IMA gratuito: los 36 leads y los 22 participantes del evento.
 
 ### Índice
 1. Mapa del sistema
@@ -156,6 +163,13 @@ Salen por **Gmail SMTP** con la cuenta de `GMAIL_USER` (remitente visible «Infi
   - Columnas: nivel, puntaje, precio visto, 👆 clic en pagar, 💳 compró, ✅ agendó y fecha.
   - Al abrir un lead se ve su recorrido (precio, clics, compra, seguimiento, anuncio de origen), los resultados completos y un botón para marcar «agendó» con el link de Calendly.
 - **Pestaña Clientes:** cada pago con monto, variante, campaña, ✉️ si salió el correo de compra (⚠️ si falló) y fecha.
+- **«⬇ Descargar Excel»:** un `.xlsx` con las hojas Leads y Clientes (columnas definidas en `lib/export-rows.js`).
+
+### Conexión en vivo a Excel / Google Sheets
+`GET /api/export?key=<EXPORT_SECRET>&tipo=leads|clientes` devuelve un CSV siempre actualizado, con las mismas columnas que el Excel.
+- **Excel:** Datos → Obtener datos → Desde la web → pegar la URL → Cargar. Para traer datos nuevos, «Actualizar todo»; también se puede programar que se actualice al abrir el archivo o cada N minutos.
+- **Google Sheets:** `=IMPORTDATA("https://<dominio>/api/export?key=...&tipo=leads")`.
+- La URL da acceso a datos personales. Si se filtra, cambiar `EXPORT_SECRET` en Vercel y hacer redeploy. Requiere `FIREBASE_SERVICE_ACCOUNT`.
 
 ---
 
@@ -262,7 +276,7 @@ utm_source=facebook&utm_medium=paid&utm_campaign={{campaign.name}}&utm_term={{ad
 7. Borrar los datos de prueba: el lead y el cliente en Firestore; el reembolso o el cupón en Stripe.
 
 ### Fase 11 — Cierre
-- [ ] Secretos con valores propios de Chris (§10): `CRON_SECRET`, `UNSUBSCRIBE_SECRET`, `FIREBASE_SERVICE_ACCOUNT`, `GMAIL_APP_PASSWORD`, `STRIPE_WEBHOOK_SECRET`.
+- [ ] Secretos con valores propios de Chris (§10): `CRON_SECRET`, `UNSUBSCRIBE_SECRET`, `EXPORT_SECRET`, `FIREBASE_SERVICE_ACCOUNT`, `GMAIL_APP_PASSWORD`, `STRIPE_WEBHOOK_SECRET`.
 - [ ] Isabel termina su parte (§9) y se retira de todo.
 
 ---
@@ -308,6 +322,7 @@ Cargar en Production y Preview. La plantilla está en `.env.local.example`.
 | `NEXT_PUBLIC_VSL_VIDEO_SRC` | URL del video en el Blob store | Sí |
 | `BLOB_READ_WRITE_TOKEN` | Se crea sola al conectar el Blob store | Automática |
 | `CRON_SECRET`, `UNSUBSCRIBE_SECRET` | `openssl rand -hex 32` (uno distinto para cada una) | Sí |
+| `EXPORT_SECRET` | `openssl rand -hex 24`. Clave de la conexión en vivo a Excel/Sheets | Para usar `/api/export` |
 | `NEXT_PUBLIC_VSL_CTA_DELAY` | Segundos hasta la oferta; sin definir = 120 | No |
 | `NEXT_PUBLIC_VSL_URL` | URL del VSL para el correo de resultados; sin definir = `https://infinixe-ima.vercel.app/vsl` | Si cambia el dominio |
 | `NEXT_PUBLIC_SITE_URL` | Base de los enlaces de baja; sin definir = `https://infinixe-ima.vercel.app` | Si cambia el dominio |
@@ -331,13 +346,14 @@ Variables del IMA Completo: las 6 `NEXT_PUBLIC_FIREBASE_*` de su proyecto (ver s
 | `app/api/stripe-webhook/route.js` | Pagos → clientes + correo de compra |
 | `app/api/cron/followup/route.js` · `app/api/unsubscribe/route.js` · `vercel.json` | Seguimiento diario y bajas |
 | `app/api/vsl-event/route.js` · `app/api/check-email/route.js` | Registro del A/B y verificación de email duplicado |
+| `app/api/export/route.js` · `lib/export-rows.js` | Conexión en vivo a Excel/Sheets y columnas del Excel de `/admin` |
 | `lib/attribution.js` · `lib/tracking.js` | UTMs y link de Stripe · Meta Pixel y GA4 |
 | `lib/firebase.js` · `lib/firebase-admin.js` | Firebase en el navegador · Firebase en el servidor |
 | `lib/email-template.js` · `lib/email-purchase.js` · `lib/email-followup.js` · `lib/mailer.js` · `lib/unsubscribe.js` | Correos |
 | `lib/report-pdf.js` · `lib/questions-pdf.js` · `lib/ima-full-questions.json` · `scripts/build-questions-pdf.mjs` | PDFs (resultado y cuestionario) |
 | `firestore.rules` | Reglas de seguridad de la base del funnel |
 | `emails/` | Vista previa de los 3 correos + PDF del cuestionario |
-| `emailjs-templates/` | Plantillas del respaldo EmailJS |
+| `emailjs-templates/` | Plantillas del respaldo EmailJS (`v2-template-es/en.html`) y cómo configurarlo (`README.md`) |
 
 ---
 
@@ -346,6 +362,7 @@ Variables del IMA Completo: las 6 `NEXT_PUBLIC_FIREBASE_*` de su proyecto (ver s
 | Quiero… | Cómo |
 |---|---|
 | Ver leads, clientes y el A/B | `/admin` |
+| Bajar todo a Excel | `/admin` → «Descargar Excel», o la conexión en vivo `/api/export` (§7) |
 | Ver pagos | Stripe → Pagos (cada uno con `client_reference_id` = id del lead) |
 | Ver errores | Vercel → proyecto → Logs (filtrar por `/api/...`) |
 | Fijar un precio (terminar el A/B) | `VSL_FORCE_VARIANT=a` o `b` + redeploy |
