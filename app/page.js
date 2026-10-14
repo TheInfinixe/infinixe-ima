@@ -2,6 +2,8 @@
 import { useState, useEffect } from "react";
 import { db } from "../lib/firebase";
 import { collection, addDoc, query, where, getDocs, serverTimestamp } from "firebase/firestore";
+import { captureAttribution, readAttribution } from "../lib/attribution";
+import { initTracking, track } from "../lib/tracking";
 
 // ─── LEVELS ─────────────────────────────────────────────────────────────────
 const LEVELS = [
@@ -379,6 +381,13 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [blocked, setBlocked] = useState(false);
   const [regError, setRegError] = useState("");
+  const [leadId, setLeadId] = useState(null); // id del documento en Firestore; viaja al VSL y a Stripe
+
+  // Guarda los UTMs que reenvía la landing y carga Meta Pixel + GA.
+  useEffect(() => {
+    captureAttribution();
+    initTracking();
+  }, []);
 
   const t = STR[lang];
   const q = QUESTIONS[cQ];
@@ -396,22 +405,33 @@ export default function Home() {
     }
   };
 
-  // Save assessment to Firebase
+  // Save assessment to Firebase. Returns the new document id (or null).
   const saveAssessment = async (results) => {
+    const doc = {
+      name: user.name,
+      email: user.email.toLowerCase().trim(),
+      company: user.company,
+      answers: ans,
+      results: results,
+      lang: lang,
+      createdAt: serverTimestamp(),
+    };
+    const attribution = readAttribution();
     try {
-      await addDoc(collection(db, "assessments"), {
-        name: user.name,
-        email: user.email.toLowerCase().trim(),
-        company: user.company,
-        answers: ans,
-        results: results,
-        lang: lang,
-        createdAt: serverTimestamp(),
-      });
-      return true;
+      const ref = await addDoc(collection(db, "assessments"), Object.keys(attribution).length ? { ...doc, attribution } : doc);
+      return ref.id;
     } catch (e) {
       console.error("Firebase save error:", e);
-      return false;
+      // Si las reglas de Firestore rechazaran el campo nuevo, el lead se guarda igual sin atribución.
+      if (Object.keys(attribution).length) {
+        try {
+          const ref = await addDoc(collection(db, "assessments"), doc);
+          return ref.id;
+        } catch (e2) {
+          console.error("Firebase save error (retry without attribution):", e2);
+        }
+      }
+      return null;
     }
   };
 
@@ -468,7 +488,15 @@ export default function Home() {
     const lvl = getLevel(oPct);
     // Stored canonical in Spanish so the admin dashboard stays consistent regardless of user's language.
     const resultData = { pillarScores: pl, overallPct: oPct, level: lvl.name, levelNum: lvl.level, estado: lvl.estado, paso: lvl.paso };
-    await saveAssessment(resultData);
+    const id = await saveAssessment(resultData);
+    setLeadId(id);
+    // Conversión "test completado" (la landing ya usa Lead para el clic en su botón).
+    track({
+      metaEvent: "CompleteRegistration",
+      metaParams: { content_name: "IMA assessment", status: `nivel_${lvl.level}` },
+      gaEvent: "assessment_complete",
+      gaParams: { level: lvl.level, overall_pct: oPct, lang },
+    });
     // For the email, send the description text in the language the user chose.
     const emailResults = { pillarScores: pl, overallPct: oPct, levelNum: lvl.level, estado: lang === "en" ? lvl.estadoEn : lvl.estado, paso: lang === "en" ? lvl.pasoEn : lvl.paso };
     // Send email via API
@@ -476,7 +504,7 @@ export default function Home() {
       await fetch("/api/send-results", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: user.name, email: user.email, company: user.company, results: emailResults, lang: lang }),
+        body: JSON.stringify({ name: user.name, email: user.email, company: user.company, results: emailResults, lang: lang, rid: id }),
       });
     } catch (e) { console.error("Email error:", e); }
     setSent(true);
@@ -741,7 +769,7 @@ export default function Home() {
                 </div>
 
                 <button style={{ ...b1, background: "linear-gradient(135deg,#B388FF,#7C4DFF)", width: "100%", fontSize: 16, padding: "16px 32px" }}
-                  onClick={() => { const firstName = (user.name || "").trim().split(/\s+/)[0] || ""; window.location.href = `/vsl?lvl=${lvl.level}&n=${encodeURIComponent(firstName)}`; }}>
+                  onClick={() => { const firstName = (user.name || "").trim().split(/\s+/)[0] || ""; window.location.href = `/vsl?lvl=${lvl.level}&n=${encodeURIComponent(firstName)}${leadId ? `&rid=${leadId}` : ""}`; }}>
                   {t.book_btn}
                 </button>
                 <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 12, textAlign: "center", margin: "10px 0 0", lineHeight: 1.5 }}>

@@ -79,7 +79,7 @@ async function sendViaEmailJS({ name, email, company, results, lang, isEn, level
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { name, email, company, results, lang } = body;
+    const { name, email, company, results, lang, rid } = body;
     const isEn = lang === "en";
 
     const levelNamesEs = ["INICIAL", "REACTIVA", "ESTRUCTURADA", "SISTEMATIZADA", "AMBIDIESTRA", "SOSTENIBLE"];
@@ -97,7 +97,9 @@ export async function POST(request) {
     const firstName = String(name || "").trim().split(/\s+/)[0] || "";
     const vslUrl =
       (process.env.NEXT_PUBLIC_VSL_URL || "https://infinixe-ima.vercel.app/vsl") +
-      `?lvl=${levelNum}&n=${encodeURIComponent(firstName)}`;
+      `?lvl=${levelNum}&n=${encodeURIComponent(firstName)}` +
+      // id del lead (Firestore) -> el VSL lo pasa a Stripe como client_reference_id
+      (typeof rid === "string" && /^[A-Za-z0-9_-]{1,200}$/.test(rid) ? `&rid=${rid}` : "");
 
     // ---------------- Primary route: Gmail SMTP + PDF attachment ------
     const gmailUser = process.env.GMAIL_USER;
