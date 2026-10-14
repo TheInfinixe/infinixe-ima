@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { app, db } from "../../lib/firebase";
 import { collection, getDocs, orderBy, query, doc, updateDoc } from "firebase/firestore";
 import { GoogleAuthProvider, getAuth, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
+import { CLIENTE_COLUMNS, LEAD_COLUMNS, clienteRow, leadRow } from "../../lib/export-rows";
 
 // Solo cuentas @infinixe.co pueden ver el panel (las reglas de Firestore exigen lo mismo).
 const STAFF_DOMAIN = "@infinixe.co";
@@ -195,6 +196,20 @@ function AdminDashboard({ user, onLogout }) {
     fetchData();
   }, []);
 
+  // Excel con dos hojas (Leads y Clientes) con todos los datos cargados en el panel.
+  const downloadExcel = async () => {
+    const XLSX = await import("xlsx");
+    const wb = XLSX.utils.book_new();
+    const sheet = (columns, rows) => {
+      const ws = XLSX.utils.aoa_to_sheet([columns, ...rows]);
+      ws["!cols"] = columns.map(c => ({ wch: Math.max(12, c.length + 2) }));
+      return ws;
+    };
+    XLSX.utils.book_append_sheet(wb, sheet(LEAD_COLUMNS, assessments.map(a => leadRow(a.id, a))), "Leads");
+    XLSX.utils.book_append_sheet(wb, sheet(CLIENTE_COLUMNS, clientes.map(c => clienteRow(c.id, c))), "Clientes");
+    XLSX.writeFile(wb, `IMA-leads-y-clientes-${new Date().toISOString().slice(0, 10)}.xlsx`);
+  };
+
   // Resumen del A/B de precio: quién vio cada precio, quién hizo clic en pagar y quién compró.
   const abStats = ["a", "b"].map(v => {
     const saw = assessments.filter(a => a.vslVariant === v);
@@ -271,12 +286,15 @@ function AdminDashboard({ user, onLogout }) {
           </div>
 
           {/* Tabs */}
-          <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+          <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
             {[["leads", `Leads (${assessments.length})`], ["clientes", `Clientes (${clientes.length})`]].map(([key, label]) => (
               <button key={key} onClick={() => setTab(key)} style={{ border: "none", borderRadius: 8, padding: "8px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", background: tab === key ? "linear-gradient(135deg,#00E5FF,#00B8D4)" : "rgba(255,255,255,0.06)", color: tab === key ? "#0a0e27" : "rgba(255,255,255,0.6)" }}>
                 {label}
               </button>
             ))}
+            <button onClick={downloadExcel} disabled={loading} style={{ marginLeft: "auto", border: "1px solid rgba(105,240,174,0.35)", borderRadius: 8, padding: "8px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", background: "rgba(105,240,174,0.12)", color: "#69F0AE" }}>
+              ⬇ Descargar Excel
+            </button>
           </div>
 
           {/* Search */}

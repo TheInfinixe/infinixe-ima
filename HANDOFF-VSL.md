@@ -1,290 +1,408 @@
-# Handoff — Funnel IMA: assessment → VSL → Stripe
+# Handoff — Sistema IMA de Infinixe (funnel de venta + IMA Completo)
 
-Documento final para dejar el funnel listo antes de lanzar los anuncios.
-**Responsable de cerrar los pendientes y dueño del proyecto:** Chris — christian@infinixe.co (GitHub `ChrisBaumal`).
-Código: <https://github.com/TheInfinixe/infinixe-ima> (público).
+**Responsable y dueño final:** Chris — christian@infinixe.co (GitHub `ChrisBaumal`).
+Todo el sistema pasa a las cuentas de Chris. Este es el **documento maestro**: explica cómo funciona todo, dónde vive cada cosa y qué hay que hacer para dejarlo funcionando. El IMA Completo tiene además su propio documento técnico: `HANDOFF.md` en su repo.
 
-> **La landing `ima.infinixe.co` NO se tocó y no necesita cambios.** Ya reenvía al assessment los UTMs del anuncio, los click ids (`fbclid`, `gclid`…) y `cta=` con el botón pulsado, y ya dispara `Lead` al hacer clic en «Assessment gratuito». Todo este documento ocurre después de ese clic.
+> **Cómo usarlo con Claude Code:** abrir este repo y pegar el prompt de la §16.
+
+### Índice
+1. Mapa del sistema
+2. Flujo completo, paso a paso
+3. Qué se guarda y dónde
+4. Correos automáticos
+5. A/B de precio
+6. Medición (Meta Pixel y Google Analytics)
+7. Panel `/admin`
+8. Setup de Chris, paso a paso
+9. Migración: quién hace qué
+10. Variables de entorno
+11. Archivos clave
+12. Operación diaria y cambios frecuentes
+13. Riesgos y problemas conocidos
+14. Video: notas técnicas
+15. Probar en local
+16. Continuar con Claude Code
 
 ---
 
-## 0. Migración: todo pasa a las cuentas de Chris
+## 1. Mapa del sistema
 
-**Objetivo:** al terminar, el proyecto vive 100 % en cuentas de Chris y no queda nada en las de Isabel. Chris hace el setup final (§3) ya en sus cuentas.
+| Pieza | Qué es | Dónde vive | Cuenta hoy |
+|---|---|---|---|
+| Anuncios | Campañas de Meta | Meta Ads | Infinixe |
+| **Landing** | `ima.infinixe.co`, página de venta del IMA. **No se modifica** | Netlify (`fascinating-swan-d76f05.netlify.app`) | Compañero que la construyó |
+| **IMA gratuito + VSL** | Test de 18 preguntas, resultados, VSL, página de gracias y panel `/admin` | Repo **`TheInfinixe/infinixe-ima`** (público) · Vercel **`infinixe-ima`** · `infinixe-ima.vercel.app` | GitHub: org Infinixe (Chris admin) · Vercel: Isabel |
+| Base de datos del funnel | Leads y clientes | Firebase **`infinixe-ima-535f8`** (Firestore) | Isabel |
+| Video del VSL | MP4 H.264, 63 MB | Vercel Blob, store `infinixe-vsl-video` | Isabel |
+| Pagos | 2 Payment Links ($450 y $350) + webhook | Stripe | Chris |
+| Correos | Resultados, compra confirmada, seguimiento | Gmail SMTP (`GMAIL_USER`) · respaldo EmailJS | Cuenta configurada hoy |
+| Medición | Meta Pixel `639402398659793` · GA4 `G-PS5BHPJBFL` | Meta / Google | Infinixe |
+| Tarea diaria | Correo de seguimiento a 24 h | Vercel Cron (`vercel.json`) | Va con el proyecto Vercel |
+| **IMA Completo** | 95 preguntas que responde el equipo del cliente tras comprar | Repo **`isabel-PLYG/Infinixe-ima-fullversion`** (privado) · Vercel **`infinixe-ima-fullversion`** · Firebase **`infinixe-ima-fullversion`** | Isabel |
+| Exportaciones del IMA Completo | Un Excel por respuesta | Google Drive: unidad compartida *Infinixe › PlayGround › IMA › Resultados* | Infinixe |
+| DNS de `infinixe.co` | Dominio de la marca | Wix | Infinixe |
+| Agenda | Link de Calendly en el detalle de cada lead en `/admin` | `calendly.com/infinixe/sesion-con-infinixe-1` | Infinixe |
 
-### Inventario
-| Recurso | Dónde está hoy | Qué hacer |
+---
+
+## 2. Flujo completo, paso a paso
+
+| # | Qué pasa | Dónde | Qué se guarda / envía | Medición |
+|---|---|---|---|---|
+| 1 | La persona ve el anuncio y hace clic | Meta Ads → `ima.infinixe.co` | El anuncio agrega UTMs a la URL (§8, fase 9) | Pixel `PageView` (landing) |
+| 2 | Clic en «Assessment gratuito» | Landing | La landing **reenvía** los UTMs, `fbclid`/`gclid` y `cta=` (nav/hero/final) al assessment | `Lead` / `generate_lead` (landing) |
+| 3 | Responde el IMA gratuito (18 preguntas) | `infinixe-ima.vercel.app/` | Los UTMs se guardan en el navegador (`lib/attribution.js`) | `PageView` |
+| 4 | Pulsa «Enviar mis Resultados» | Assessment | **Se guarda el lead** en Firestore `assessments` (con `attribution`) · **correo de resultados** con PDF y botón al VSL | `CompleteRegistration` / `assessment_complete` |
+| 5 | Pulsa «Qué significa tu resultado →» | → `/vsl?lvl=&n=&rid=` | `rid` = id del lead. El middleware asigna el precio del A/B **según ese id** | — |
+| 6 | Ve el VSL | `/vsl` (A $450) ó `/vsl-b` (B $350), URL visible siempre `/vsl` | Lead: `vslVariant`, `vslPrice`, `vslViews` | `ViewContent` / `vsl_view` |
+| 7 | A los 2:00 aparece la oferta | VSL | — | `vsl_offer_shown` |
+| 8 | Clic en «Desbloquear mi IMA Completo» | → Stripe Payment Link | Lead: `checkoutClicks`. El link lleva `client_reference_id` (id del lead) + UTMs | `InitiateCheckout` / `begin_checkout` |
+| 9 | Paga | Stripe | Stripe avisa al **webhook** `/api/stripe-webhook` → se crea el cliente en `clientes`, el lead queda `purchased: true` y sale el **correo de compra confirmada** (link al IMA Completo de prueba + PDF con las 95 preguntas) | — |
+| 10 | Stripe lo redirige | `/gracias?p=450|350&session_id=` | — | `Purchase` / `purchase` |
+| 11 | Si **no** compró | Cron diario (16:00 UTC) | Entre 24 h y 7 días después del test, **una vez**: correo de seguimiento → vuelve al VSL con la oferta visible y el mismo precio | — |
+| 12 | Chris contacta y hace la sesión 1:1 | — | Seguimiento en `/admin` (columna «Agendó», link a Calendly) | — |
+| 13 | Chris crea la empresa en el IMA Completo y envía el link al equipo del cliente | `infinixe-ima-fullversion.vercel.app` | Firestore `companies` (proyecto `infinixe-ima-fullversion`) | — |
+| 14 | El equipo responde las 95 preguntas | `/assess/[id]?t=token` | Firestore `submissions` con foto del puntaje | — |
+| 15 | Chris revisa resultados y exporta | Dashboard del IMA Completo → «Exportar al Drive» | Excel por respuesta en la unidad compartida de Drive | — |
+
+Pasos 13–15: ver `HANDOFF.md` del repo del IMA Completo.
+
+---
+
+## 3. Qué se guarda y dónde
+
+### Firestore del funnel — proyecto `infinixe-ima-535f8`
+
+**`assessments`**: un documento por lead.
+| Campo | Lo escribe | Qué es |
 |---|---|---|
-| Código — GitHub `TheInfinixe/infinixe-ima` | Org `TheInfinixe`; **Chris ya es admin** de la org y del repo | Nada que mover. Al final Chris decide si retira a `isabel-PLYG` y `mariaisabel95`. |
-| Proyecto Vercel `infinixe-ima` | Team de Isabel (`isabel-plyg's projects`) | Transferir o recrear (ver «Vercel») |
-| Video — Vercel Blob `infinixe-vsl-video` | Team de Isabel | Chris crea su store y vuelve a subir el video (ver «Video») |
-| Variables de entorno | Proyecto Vercel de Isabel | Chris las carga con **valores propios** (§6) |
-| Firebase `infinixe-ima-535f8` (leads y clientes) | Acceso de Isabel | Agregar a christian@infinixe.co como **Propietario** y luego retirar a Isabel (ver «Firebase») |
-| Cuenta que envía los correos (Gmail SMTP) | La configurada hoy en `GMAIL_USER` | Chris elige la cuenta remitente y crea su contraseña de aplicación (ver «Correos») |
-| EmailJS (respaldo del correo de resultados) | Cuenta configurada en `EMAILJS_*` | Chris crea su cuenta con las plantillas de `emailjs-templates/`, o elimina el respaldo |
-| Stripe, Meta Pixel, GA4, landing (Netlify), DNS (Wix) | Ya son de Infinixe / Chris | Sin cambios |
-| IMA full version (el correo de compra enlaza a su `/cuestionario`) | Vercel y GitHub de Isabel (`infinixe-ima-fullversion`) | Si también se migra y cambia su URL, actualizar `IMA_FULL_DEMO_URL` en `lib/email-purchase.js` e `IMA_FULL_ONLINE` en `lib/questions-pdf.js`, y regenerar el PDF |
+| `name`, `email`, `company`, `lang`, `createdAt` | Test (navegador) | Datos del lead |
+| `answers`, `results` (`overallPct`, `level`, `levelNum`, `pillarScores`, `estado`, `paso`) | Test | Respuestas y resultado |
+| `attribution` (`utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`, `utm_id`, `fbclid`, `gclid`, `msclkid`, `li_fat_id`, `cta`, `captured_at`) | Test | De qué anuncio vino |
+| `vslVariant` (`a`/`b`), `vslPrice`, `vslViews`, `vslFirstViewAt`, `vslLastViewAt` | `/api/vsl-event` | Precio que vio (el primero) y visitas al VSL |
+| `checkoutClicks`, `checkoutFirstClickAt`, `checkoutLastClickAt` | `/api/vsl-event` | Clics en «Desbloquear» |
+| `purchased`, `purchasedAt`, `purchaseSessionId`, `purchaseAmount` | Webhook de Stripe | Compró |
+| `followUpSentAt`, `unsubscribed`, `unsubscribedAt` | Cron / `/api/unsubscribe` | Correo de seguimiento y bajas |
+| `appointmentBooked` | `/admin` | Marcado a mano: agendó sesión |
 
-### Orden recomendado (sin cortar el funnel)
-1. **Firebase:** Isabel agrega a Chris como Propietario.
-2. **Vercel:** Chris tiene su proyecto funcionando (transferido o recreado), con video, variables y deploy probados.
-3. **Stripe:** Chris configura la redirección y el webhook (§3.1, §3.2) apuntando al dominio final.
-4. **Cambio de URL** (solo si se recreó el proyecto): ver paso 5 de «Vercel».
-5. **Cierre:** Isabel borra su proyecto y su Blob store, sale de Firebase y borra su `.env.local`. Chris regenera los secretos (ver «Secretos»).
+**`clientes`**: un documento por pago (id = sesión de Stripe).
+`stripeSessionId`, `leadId`, `email`, `name`, `company`, `amount`, `currency`, `variant`, `levelNum`, `attribution`, `paymentLink`, `livemode`, `createdAt`, `purchaseEmailSentAt` o `purchaseEmailError`.
 
-### Vercel — dos caminos
-**A) Transferir el proyecto** (Settings → General → Transfer Project). Requiere que Chris tenga un team **Pro** y que Isabel sea miembro de ese team; los teams Hobby no admiten miembros. Pasan deployments, variables, dominios (incluido `infinixe-ima.vercel.app`), crons y la conexión con GitHub. **No** pasa el Blob store: el video se resuelve igual que en B.
+**Seguridad:** `firestore.rules` permite que cualquiera **cree** su lead al hacer el test, pero solo cuentas `@infinixe.co` pueden **leer**. `clientes` solo la escribe el servidor. Las rutas de API usan el Admin SDK (`FIREBASE_SERVICE_ACCOUNT`) y no pasan por las reglas.
 
-**B) Recrear el proyecto en la cuenta de Chris** (cualquier plan; recomendado si Chris usa Hobby):
-1. Vercel → **Add New → Project** → importar `TheInfinixe/infinixe-ima` (Next.js, sin ajustes).
-2. Cargar las variables de §6 con valores propios.
-3. Subir el video a su propio store (ver «Video»).
-4. Deploy y probar en la URL `*.vercel.app` que le asigne Vercel.
-5. **URL pública:** la landing, Stripe y los correos usan `infinixe-ima.vercel.app`, y ese nombre lo tiene el proyecto de Isabel. Isabel elimina su proyecto (o le quita ese dominio) y en ese momento Chris agrega `infinixe-ima.vercel.app` en **Settings → Domains** de su proyecto. Son unos minutos de corte: hacerlo antes de lanzar anuncios. Alternativa sin corte y sin depender de ese nombre: pasar directamente a `assessment.infinixe.co` (§5).
-6. En Hobby, si Vercel bloquea un deploy porque el autor del commit no pertenece al proyecto, hacer un commit propio o «Redeploy» desde el dashboard.
+### Firestore del IMA Completo — proyecto `infinixe-ima-fullversion`
+`admins`, `companies`, `submissions`: ver `HANDOFF.md` y `docs/ARCHITECTURE.md` de ese repo.
 
-### Video
-Descargar la versión H.264 desde la URL actual y subirla al store de Chris **antes** de que Isabel borre el suyo:
+### Fuera de Firestore
+- **Stripe:** cada pago, con `client_reference_id` = id del lead y los UTMs.
+- **Meta / GA4:** los eventos de la §6.
+- **Navegador del visitante:** `localStorage.ima_attr` (UTMs) y la cookie `vsl_variant` (precio para visitas sin id de lead).
+- **Vercel Blob:** el video.
+- **Google Drive:** los Excel exportados del IMA Completo.
+
+---
+
+## 4. Correos automáticos
+
+Salen por **Gmail SMTP** con la cuenta de `GMAIL_USER` (remitente visible «Infinixe»). Las plantillas están en el código y se migran con el repo. En **`emails/`** hay una vista previa HTML de cada una y el PDF del cuestionario.
+
+| Correo | Cuándo | Plantilla | Adjunto | Responder a | Notas |
+|---|---|---|---|---|---|
+| **Resultados** (ES/EN) | Al pulsar «Enviar mis Resultados» | `lib/email-template.js` (vía `app/api/send-results`) | PDF de 1 página con el resultado (`lib/report-pdf.js`) | Remitente | Si Gmail falla, usa **EmailJS** como respaldo (sin adjunto; plantillas en `emailjs-templates/` y en la cuenta de EmailJS) |
+| **Compra confirmada** | Cuando Stripe confirma el pago (webhook) | `lib/email-purchase.js` | `IMA-Completo-Cuestionario.pdf` con las 95 preguntas, sin puntajes (`lib/questions-pdf.js`) | `christian@infinixe.co` | Si falla, el cliente queda guardado con `purchaseEmailError` y Stripe reintenta |
+| **Seguimiento 24 h** | Cron diario: test hecho hace entre 24 h y 7 días, sin compra, sin baja, idioma español | `lib/email-followup.js` | — | Remitente | Una sola vez por lead. Incluye enlace de baja firmado. **No corre hasta que exista `STRIPE_WEBHOOK_SECRET`** |
+
+**PDF del cuestionario:** se genera desde `lib/ima-full-questions.json`, una copia sin puntajes de `web/data/questions.json` del IMA Completo. Si cambian las preguntas allá, volver a copiarla (solo `id`, `elemento`, `pilar`, `subpilar`, `pregunta`, `tipo` y las etiquetas de las opciones) y correr `node scripts/build-questions-pdf.mjs`. El PDF corrige al mostrarlos dos nombres de categoría que vienen con errores en los datos («Why  How What» → «Why, How & What», «Metricas» → «Métricas»).
+
+---
+
+## 5. A/B de precio
+
+- **A = $450** (`app/vsl`, `NEXT_PUBLIC_STRIPE_LINK_450`) · **B = $350** (`app/vsl-b`, `NEXT_PUBLIC_STRIPE_LINK_350`). Ambas usan `app/vsl/VslPage.js`.
+- `middleware.js` decide la variante en este orden:
+  1. `VSL_FORCE_VARIANT` (cierra el test).
+  2. `?v=a|b` (pruebas manuales).
+  3. Id del lead (`rid`): **mismo precio siempre, en cualquier dispositivo** (`lib/ab.js`).
+  4. Cookie `vsl_variant` (visitas sin id).
+  5. Al azar.
+
+  Probado: 200 leads → 99 / 101.
+- **Ver resultados:** `/admin` → recuadro «A/B de precio del VSL» (vieron · clic en pagar · compraron, por variante). También en Stripe (ventas por Payment Link) y GA4 (`purchase` por `value`).
+- **Terminar el test:** en Vercel, `VSL_FORCE_VARIANT=a` (o `b`) + redeploy.
+
+---
+
+## 6. Medición (Meta Pixel y Google Analytics)
+
+| Paso | Meta Pixel | GA4 | Dónde se dispara |
+|---|---|---|---|
+| Clic en botón de la landing | `Lead` | `generate_lead` | Landing |
+| Envía resultados del test | `CompleteRegistration` | `assessment_complete` | `app/page.js` |
+| Abre el VSL | `ViewContent` | `vsl_view` | `app/vsl/VslPage.js` |
+| Aparece la oferta | — | `vsl_offer_shown` | VSL |
+| Clic en «Desbloquear» | `InitiateCheckout` | `begin_checkout` | VSL |
+| Vuelve de Stripe | `Purchase` | `purchase` | `app/gracias/` (no se duplica si recarga) |
+
+- IDs en `NEXT_PUBLIC_META_PIXEL_ID` y `NEXT_PUBLIC_GA_ID` (los mismos de la landing). Sin esas variables no se carga nada (recomendado en local).
+- El nombre de la persona viaja en `?n=` para personalizar el VSL y **se quita de la URL antes de medir**: no llega a Meta ni a Google.
+
+---
+
+## 7. Panel `/admin`
+
+- Entra solo con Google **`@infinixe.co`** (Firebase Authentication).
+- **Recuadro A/B:** vieron · clic en pagar · compraron, por variante.
+- **Pestaña Leads:**
+  - Columnas: nivel, puntaje, precio visto, 👆 clic en pagar, 💳 compró, ✅ agendó y fecha.
+  - Al abrir un lead se ve su recorrido (precio, clics, compra, seguimiento, anuncio de origen), los resultados completos y un botón para marcar «agendó» con el link de Calendly.
+- **Pestaña Clientes:** cada pago con monto, variante, campaña, ✉️ si salió el correo de compra (⚠️ si falló) y fecha.
+
+---
+
+## 8. Setup de Chris, paso a paso
+
+Orden pensado para que el funnel no se corte. Marcar cada casilla al terminar. Los pasos de Isabel están en la §9.
+
+### Fase 1 — Accesos
+- [ ] GitHub: Chris es admin de `TheInfinixe/infinixe-ima` (ya lo es) y recibe el repo del IMA Completo (ver `HANDOFF.md` §6.1 de ese repo).
+- [ ] Firebase: Chris es **Propietario** de `infinixe-ima-535f8` (funnel) y de `infinixe-ima-fullversion` (IMA Completo).
+- [ ] Unidad compartida de Drive *IMA › Resultados*: Chris tiene acceso.
+
+### Fase 2 — Vercel (los dos proyectos)
+Dos caminos, para cada proyecto:
+- **A) Transferir** (Settings → General → Transfer Project): requiere un team **Pro** de Chris con Isabel como miembro. Pasan deployments, variables, dominios, crons y la conexión con GitHub. **No** pasa el Blob store.
+- **B) Recrear** (cualquier plan): Add New → Project → importar el repo.
+  - Funnel: raíz del repo.
+  - IMA Completo: **Root Directory `web`**.
+
+  Luego cargar las variables de la §10 y desplegar.
+
+Video (en ambos caminos), **antes** de que Isabel borre su store:
 ```bash
 curl -o vsl-julio-h264.mp4 https://isclmsuyunbjrocp.public.blob.vercel-storage.com/vsl/vsl-julio-h264.mp4
-vercel link                                                   # vincular la carpeta a su proyecto
+vercel link                      # en una carpeta vinculada al proyecto del funnel de Chris
 vercel blob create-store infinixe-vsl-video --access public --yes
 vercel blob put vsl-julio-h264.mp4 --access public --pathname vsl/vsl-julio-h264.mp4 --rw-token <BLOB_READ_WRITE_TOKEN>
 ```
-Poner la URL que devuelva en `NEXT_PUBLIC_VSL_VIDEO_SRC` y redeploy. El original en HEVC está en Drive (§7).
+→ poner la URL resultante en `NEXT_PUBLIC_VSL_VIDEO_SRC`.
 
-### Firebase
-1. Isabel: consola → ⚙ **Configuración del proyecto → Usuarios y permisos → Agregar miembro** → `christian@infinixe.co` → **Propietario**.
-2. Chris genera **su propia** clave de cuenta de servicio (`FIREBASE_SERVICE_ACCOUNT`) y, en Google Cloud → IAM → Cuentas de servicio, elimina las claves creadas antes.
-3. Si el proyecto tiene facturación (plan Blaze) ligada a una cuenta de Isabel, cambiarla a la de Infinixe.
-4. Al final, Isabel se retira de Usuarios y permisos.
-Los pasos de seguridad de §3.4 los hace Chris como Propietario.
+**Plan Hobby, tres límites a tener en cuenta:**
+- No despliega repos **privados** de una organización.
+- Puede bloquear deploys cuyo autor de commit no sea el dueño; en ese caso, commit propio o «Redeploy».
+- El cron corre como máximo una vez al día, que es lo que usa este proyecto.
 
-### Correos
-Las 3 plantillas viven **en el código**, así que se migran con el repo: `lib/email-template.js` (resultados), `lib/email-purchase.js` (compra) y `lib/email-followup.js` (seguimiento). En **`emails/`** hay una vista previa HTML de cada una con datos de ejemplo, que sirve para revisarlas o recrearlas tal cual si se cambia de plataforma de envío. Lo único que cambia es **la cuenta que envía**:
-- Elegir la cuenta remitente (p. ej. `hello@infinixe.co`). Necesita la **verificación en 2 pasos** activa y una **contraseña de aplicación** (Cuenta de Google → Seguridad → Contraseñas de aplicaciones).
-- `GMAIL_USER` = esa cuenta · `GMAIL_APP_PASSWORD` = la contraseña de aplicación.
-- Si Google Workspace tiene bloqueadas las contraseñas de aplicación, usar un proveedor de envío (Resend, SendGrid…) y adaptar `lib/mailer.js` y el bloque de Gmail de `app/api/send-results/route.js`.
-- El correo de compra se responde a `christian@infinixe.co` (`CHRIS_EMAIL` en `lib/email-purchase.js`).
-- Remitente visible: «Infinixe» (`lib/mailer.js` y `send-results`).
+### Fase 3 — Firebase del funnel (`infinixe-ima-535f8`)
+- [ ] **⚙ Configuración del proyecto → Cuentas de servicio → Generar nueva clave privada** → el JSON completo en `FIREBASE_SERVICE_ACCOUNT`, en Production y Preview.
+  - Si aparece un error de **política de la organización** (`iam.disableServiceAccountKeyCreation`): Infinixe tiene bloqueada la creación de claves (pasó con el IMA Completo). Dos salidas:
+    1. Un administrador de la organización de Google Cloud crea una **excepción solo para este proyecto**: IAM y administración → Políticas de la organización → «Disable service account key creation» → Administrar política → Anular para el proyecto → Desactivar.
+    2. Conexión **sin clave** con Vercel OIDC + Workload Identity Federation (<https://vercel.com/docs/oidc/gcp>). Requiere adaptar `lib/firebase-admin.js`.
+- [ ] **Authentication → Método de acceso → Google:** habilitar.
+- [ ] **Authentication → Configuración → Dominios autorizados:** agregar el dominio del funnel (`infinixe-ima.vercel.app` o el que quede).
 
-### Secretos que Chris debe generar con valores propios
-| Variable | Cómo |
+### Fase 4 — Cuenta que envía los correos
+- [ ] Elegir la cuenta remitente (p. ej. `hello@infinixe.co`), activar su **verificación en 2 pasos** y crear una **contraseña de aplicación** (Cuenta de Google → Seguridad → Contraseñas de aplicaciones).
+- [ ] `GMAIL_USER` = esa cuenta · `GMAIL_APP_PASSWORD` = la contraseña de aplicación.
+- [ ] Si Workspace bloquea las contraseñas de aplicación: usar un proveedor (Resend, SendGrid…) y adaptar `lib/mailer.js` y el bloque Gmail de `app/api/send-results/route.js`. Las vistas previas de `emails/` sirven para recrear las plantillas tal cual.
+- [ ] EmailJS (respaldo): crear la cuenta propia con las plantillas de `emailjs-templates/` y cargar `EMAILJS_*`, o quitar el respaldo.
+
+### Fase 5 — Desplegar el código del funnel
+- [ ] Mergear el PR **TheInfinixe/infinixe-ima#2** a `main`, **después** de la fase 3: sin el login de Google, `/admin` no deja entrar.
+- [ ] Probar `/admin` con una cuenta `@infinixe.co`: deben verse los leads.
+
+### Fase 6 — Cerrar la base del funnel
+- [ ] Firestore → **Reglas** → pegar `firestore.rules` → Publicar. Si otra app usa ese proyecto, combinar sus reglas antes.
+- [ ] Comprobar: el test sigue guardando leads, `/admin` sigue mostrando datos y una lectura sin login devuelve `PERMISSION_DENIED`.
+
+### Fase 7 — Stripe
+- [ ] **Redirección después del pago.** Enlaces de pago → editar cada link → **Después del pago** → página de confirmación → redirigir a tu sitio web:
+  - $450 → `https://<dominio-del-funnel>/gracias?p=450&session_id={CHECKOUT_SESSION_ID}`
+  - $350 → `https://<dominio-del-funnel>/gracias?p=350&session_id={CHECKOUT_SESSION_ID}`
+
+  `{CHECKOUT_SESSION_ID}` se escribe tal cual; Stripe lo reemplaza y además agrega los UTMs.
+- [ ] **Webhook.** Desarrolladores → Webhooks → Agregar endpoint (modo **live**):
+  - URL: `https://<dominio-del-funnel>/api/stripe-webhook`
+  - Eventos: `checkout.session.completed` y `checkout.session.async_payment_succeeded`
+  - Copiar el **Signing secret** a `STRIPE_WEBHOOK_SECRET` (Production) y hacer **Redeploy**.
+
+  Debe ser el dominio de **producción**: los previews de Vercel piden login y Stripe no podría entrar.
+- [ ] Con el webhook activo, el **correo de seguimiento** empieza a funcionar solo (cron diario).
+
+### Fase 8 — URLs definitivas
+Si algún proyecto cambia de URL (por recrearlo o por usar dominio propio), actualizar:
+
+| Qué cambió | Dónde actualizar |
 |---|---|
-| `CRON_SECRET`, `UNSUBSCRIBE_SECRET` | `openssl rand -hex 32` (uno distinto para cada una) |
-| `FIREBASE_SERVICE_ACCOUNT` | Clave nueva desde Firebase (ver «Firebase») |
-| `GMAIL_APP_PASSWORD` | De la cuenta remitente elegida |
-| `BLOB_READ_WRITE_TOKEN` | Se crea solo al conectar su Blob store |
-| `STRIPE_WEBHOOK_SECRET` | Al crear el webhook en Stripe (§3.2) |
+| URL del funnel | Firebase (funnel) → Dominios autorizados · Stripe (redirección y webhook) · `NEXT_PUBLIC_VSL_URL` y `NEXT_PUBLIC_SITE_URL` · los botones de la landing, que hoy apuntan a `https://infinixe-ima.vercel.app/` (eso lo hace quien mantiene la landing) |
+| URL del IMA Completo | Firebase (IMA Completo) → Dominios autorizados · `IMA_FULL_DEMO_URL` en `lib/email-purchase.js` · `IMA_FULL_ONLINE` en `lib/questions-pdf.js` · regenerar el PDF |
 
----
+**Dominio propio opcional:** `assessment.infinixe.co`. Se agrega en Vercel y con un CNAME en Wix (host `assessment`, valor el que indique Vercel). Da más confianza y Pixel/GA reconocen a la misma persona entre la landing y el assessment. Requiere cambiar los links de la landing.
 
-## 1. Estado
-
-| Tema | Estado |
-|---|---|
-| VSL con el mismo estilo visual que la landing | ✅ |
-| Video del VSL (H.264, Vercel Blob, 63 MB) | ✅ |
-| A/B de precio 50/50 ($450 / $350), fijo por persona | ✅ |
-| A/B registrado en la base: precio visto, clic en pagar, compra | ✅ |
-| UTMs del anuncio guardados con cada lead | ✅ |
-| Link de Stripe con id del lead + UTMs | ✅ |
-| Meta Pixel + Google Analytics (assessment, VSL, gracias) | ✅ |
-| Correo de resultados (Gmail + PDF) | ✅ probado en producción |
-| Base de **clientes** + correo de **compra confirmada** | ✅ código · ⏳ activar webhook (§3.2) |
-| Correo de **seguimiento a 24 h** a quien no compró | ✅ código · ⏳ se activa solo con el webhook (§3.2) |
-| `/admin` con login Google `@infinixe.co` + pestaña Clientes + resumen A/B | ✅ código · ⏳ pasos Firebase (§3.4) |
-| Base de datos cerrada al público (reglas de Firestore) | ⏳ publicar reglas (§3.4) |
-| Stripe: redirección a `/gracias` | ⏳ §3.1 |
-| UTMs en los anuncios de Meta | ⏳ §3.3 |
-| Dominio propio `assessment.infinixe.co` | opcional, §5 |
-
----
-
-## 2. Cómo funciona
-
-```
-Anuncio (con UTMs)
- → ima.infinixe.co                 landing (Netlify)          Pixel: PageView, Lead (clic)
- → infinixe-ima.vercel.app/        assessment                 guarda lead + UTMs · correo de resultados · Pixel: CompleteRegistration
- → /vsl  (A $450 ó B $350)         VSL                        guarda precio visto / clic en pagar · Pixel: ViewContent, InitiateCheckout
- → Stripe Payment Link             + client_reference_id (id del lead) + UTMs
- → webhook /api/stripe-webhook     guarda cliente · marca lead comprado · correo de compra confirmada
- → /gracias?p=450|350              página de gracias          Pixel: Purchase
- → (24 h después, si no compró)    correo de seguimiento → vuelve al VSL con la oferta visible
-```
-
-### Correos automáticos (todos salen por la cuenta Gmail de `GMAIL_USER`)
-| Correo | Cuándo | Archivo |
-|---|---|---|
-| Resultados (+ PDF, botón al VSL) | Al pulsar «Enviar mis Resultados» al final del test | `lib/email-template.js` |
-| Compra confirmada | Cuando Stripe confirma el pago (webhook). Responder llega a Chris | `lib/email-purchase.js` |
-| Seguimiento | Una vez, entre 24 h y 7 días después del test, si no compró ni se dio de baja | `lib/email-followup.js` |
-
-El correo de compra explica los siguientes pasos (Chris contacta, el IMA Completo se responde en equipo, sesión 1:1), enlaza al IMA Completo de prueba <https://infinixe-ima-fullversion.vercel.app/cuestionario> (navegable, no guarda respuestas) y **adjunta el PDF «IMA-Completo-Cuestionario.pdf»** con las 95 preguntas, para que el cliente lo tenga y lo comparta con su equipo.
-
-**PDF del cuestionario**
-- Se genera al enviar el correo con `lib/questions-pdf.js` a partir de `lib/ima-full-questions.json` (preguntas y opciones **sin puntajes**, porque este repo es público).
-- Copia lista para revisar o enviar a mano: `emails/IMA-Completo-Cuestionario.pdf`.
-- **Si cambian las preguntas del IMA full version** (`web/data/questions.json` de ese proyecto): volver a copiar `lib/ima-full-questions.json` (solo `id`, `elemento`, `pilar`, `subpilar`, `pregunta`, `tipo` y las etiquetas de las opciones) y correr `node scripts/build-questions-pdf.mjs`.
-- En los datos del full version hay dos nombres de categoría con errores: «Why  How What» (→ «Why, How & What») y «Metricas» (→ «Métricas»). El PDF los corrige al mostrarlos (`CATEGORY_FIXES` en `lib/questions-pdf.js`); conviene corregirlos también en el full version.
-El seguimiento corre a diario a las 16:00 UTC (`vercel.json`) y **no envía nada mientras el webhook de Stripe no esté configurado**: sin registro de compras le escribiría también a quien sí compró. La ventana de 7 días evita escribir a leads antiguos. Incluye un enlace para darse de baja.
-
-### A/B de precio
-- Cada lead recibe siempre el mismo precio, en cualquier dispositivo (se calcula a partir de su id). Sin id (visita directa) se usa una cookie de 90 días.
-- Probar a mano: `/vsl?v=a` o `/vsl?v=b`; ver la oferta sin esperar: `&cta=1`.
-- **Ver resultados:** `/admin` → recuadro «A/B de precio del VSL»: cuántos vieron cada precio, cuántos hicieron clic en pagar y cuántos compraron.
-- **Terminar el test sin tocar código:** en Vercel crear `VSL_FORCE_VARIANT=a` (o `b`) y redeploy.
-
-### Eventos de medición
-| Paso | Meta Pixel | Google Analytics 4 |
-|---|---|---|
-| Clic en botón de la landing | `Lead` (landing) | `generate_lead` (landing) |
-| Termina el test y envía resultados | `CompleteRegistration` | `assessment_complete` |
-| Abre el VSL | `ViewContent` | `vsl_view` |
-| Aparece la oferta (2:00) | — | `vsl_offer_shown` |
-| Clic en «Desbloquear mi IMA Completo» | `InitiateCheckout` | `begin_checkout` |
-| Paga y vuelve a `/gracias` | `Purchase` | `purchase` |
-
-IDs (los mismos de la landing): Pixel `639402398659793` · GA4 `G-PS5BHPJBFL`. El nombre de la persona se quita de la URL antes de medir.
-
----
-
-## 3. Pasos pendientes para lanzar
-
-### 3.1 Stripe — redirigir a `/gracias` después del pago  *(Chris)*
-Stripe → **Enlaces de pago** → editar cada link → **Después del pago** → **Página de confirmación**: redirigir a tu sitio web:
-
-| Payment Link | URL de redirección |
-|---|---|
-| $450 | `https://infinixe-ima.vercel.app/gracias?p=450&session_id={CHECKOUT_SESSION_ID}` |
-| $350 | `https://infinixe-ima.vercel.app/gracias?p=350&session_id={CHECKOUT_SESSION_ID}` |
-
-`{CHECKOUT_SESSION_ID}` se escribe tal cual; Stripe lo reemplaza y agrega los UTMs.
-
-### 3.2 Stripe — webhook de pagos  *(Chris)*
-Activa la base de clientes, el correo de compra y el seguimiento a 24 h.
-1. Stripe → **Desarrolladores → Webhooks → Agregar endpoint** (en modo **live**).
-2. URL: `https://infinixe-ima.vercel.app/api/stripe-webhook`
-3. Eventos: `checkout.session.completed` y `checkout.session.async_payment_succeeded`.
-4. Copiar el **Signing secret** (`whsec_...`) → Vercel, proyecto `infinixe-ima` → Settings → Environment Variables → `STRIPE_WEBHOOK_SECRET` (Production) → **Redeploy**.
-5. Probar: en el webhook de Stripe → «Enviar evento de prueba» no sirve (no trae datos reales); lo correcto es una compra real o en modo test con un endpoint de test. Tras el primer pago, el cliente aparece en `/admin` → Clientes con ✉️ (correo enviado).
-
-### 3.3 UTMs en los anuncios de Meta  *(quien administre los anuncios)*
-Los anuncios apuntan a `https://ima.infinixe.co`. En cada anuncio → **Parámetros de URL**:
+### Fase 9 — Anuncios
+- [ ] En cada anuncio de Meta → **Parámetros de URL**:
 ```
 utm_source=facebook&utm_medium=paid&utm_campaign={{campaign.name}}&utm_term={{adset.name}}&utm_content={{ad.name}}
 ```
 
-### 3.4 Firebase — cerrar la base de datos  *(consola de Firebase, proyecto `infinixe-ima-535f8`)*
-Hoy la colección `assessments` se puede leer sin login (nombres, correos y empresas de todos los leads). Pasos, **en este orden**:
-1. **Configuración del proyecto → Cuentas de servicio → Generar nueva clave privada** → el JSON completo va en la env var `FIREBASE_SERVICE_ACCOUNT` de Vercel (Production y Preview). Lo usan las rutas del servidor.
-2. **Authentication → Método de acceso → Google:** habilitar.
-3. **Authentication → Configuración → Dominios autorizados:** agregar `infinixe-ima.vercel.app`.
-4. Desplegar el código (merge a `main`) y comprobar que `/admin` entra con una cuenta `@infinixe.co`.
-5. **Firestore Database → Reglas:** pegar el contenido de `firestore.rules` y publicar. Si el proyecto Firebase lo usa otra app, combinar sus reglas antes de publicar.
-6. Comprobar: el test sigue guardando leads, `/admin` sigue mostrando datos, y una lectura sin login devuelve `PERMISSION_DENIED`.
+### Fase 10 — Prueba completa de punta a punta
+1. Abrir `https://ima.infinixe.co/?utm_source=prueba&utm_campaign=test-final`, clic en «Assessment gratuito», responder y **enviar resultados** con un correo propio.
+   - Llega el correo de resultados.
+   - En `/admin` aparece el lead con «Origen: prueba · test-final».
+2. Clic en «Qué significa tu resultado →». En el VSL, esperar la oferta o agregar `&cta=1` a la URL.
+   - En `/admin` el lead muestra el precio visto.
+3. Clic en «Desbloquear».
+   - 👆 en `/admin`.
+4. **Pagar.** Opciones:
+   - Compra real y reembolso desde Stripe.
+   - Cupón del 100 %: crear un código de promoción y habilitar «permitir códigos promocionales» en el link solo para la prueba.
+5. Tras pagar debe pasar todo esto:
+   - Redirección a `/gracias`.
+   - Llega el correo de compra con el PDF.
+   - En `/admin` → Clientes aparece el pago con ✉️, y el lead muestra 💳.
+6. Meta → Administrador de eventos → **Probar eventos**: ver `CompleteRegistration`, `ViewContent`, `InitiateCheckout` y `Purchase`.
+7. Borrar los datos de prueba: el lead y el cliente en Firestore; el reembolso o el cupón en Stripe.
 
-### 3.5 Verificaciones con el primer lead real
-- En `/admin`, el lead nuevo muestra origen (campaña), precio visto y, si hizo clic, 👆.
-- Meta → Administrador de eventos → **Probar eventos**: ver `CompleteRegistration`, `ViewContent`, `InitiateCheckout`.
+### Fase 11 — Cierre
+- [ ] Secretos con valores propios de Chris (§10): `CRON_SECRET`, `UNSUBSCRIBE_SECRET`, `FIREBASE_SERVICE_ACCOUNT`, `GMAIL_APP_PASSWORD`, `STRIPE_WEBHOOK_SECRET`.
+- [ ] Isabel termina su parte (§9) y se retira de todo.
 
 ---
 
-## 4. Base de datos (Firestore, proyecto `infinixe-ima-535f8`)
+## 9. Migración: quién hace qué
 
-### `assessments` — un documento por lead
-| Campo | Quién lo escribe | Qué es |
+### Isabel
+1. **GitHub:**
+   - Transferir `isabel-PLYG/Infinixe-ima-fullversion`, ya sea a la org `TheInfinixe` (requiere Vercel Pro) o a `ChrisBaumal` (funciona en Hobby). Detalle en `HANDOFF.md` del IMA Completo.
+   - El repo del funnel ya está en la org y Chris es admin.
+2. **Firebase:** agregar `christian@infinixe.co` como **Propietario** en `infinixe-ima-535f8` y en `infinixe-ima-fullversion`. Si alguno tiene facturación ligada a su cuenta, coordinar el cambio.
+3. **Vercel:** transferir los dos proyectos si Chris tiene Pro, o esperar a que Chris los recree. En ese caso, cuando los de Chris funcionen, **eliminar los suyos** (`infinixe-ima`, `infinixe-ima-fullversion`) para liberar las URLs `*.vercel.app`, y luego el Blob store `infinixe-vsl-video`.
+4. **Enviar a Chris:**
+   - El link del repo del funnel y del PR #2.
+   - Este documento y el `HANDOFF.md` del IMA Completo.
+   - Confirmación de cuál es hoy la cuenta de `GMAIL_USER` y de quién es la cuenta de EmailJS.
+   - **No hace falta enviar contraseñas ni claves:** Chris genera las suyas.
+5. **Al final:**
+   - Retirarse de Firebase (Usuarios y permisos) en los dos proyectos.
+   - Borrar los `.env.local` de su computadora.
+   - Si la contraseña de aplicación de Gmail era de una cuenta suya, revocarla.
+   - Chris decide si la quita de la org de GitHub.
+
+### Chris
+Fases 1 a 11 de la §8.
+
+---
+
+## 10. Variables de entorno (proyecto Vercel del funnel)
+
+Cargar en Production y Preview. La plantilla está en `.env.local.example`.
+
+| Variable | De dónde sale | Obligatoria |
 |---|---|---|
-| `name`, `email`, `company`, `answers`, `results`, `lang`, `createdAt` | test (navegador) | Lead y resultados |
-| `attribution` | test (navegador) | UTMs, click ids y `cta` del anuncio |
-| `vslVariant` (`a`/`b`), `vslPrice`, `vslViews`, `vslFirstViewAt`, `vslLastViewAt` | `/api/vsl-event` | Precio que vio en el VSL (el primero) |
-| `checkoutClicks`, `checkoutFirstClickAt`, `checkoutLastClickAt` | `/api/vsl-event` | Clics en «Desbloquear» |
-| `purchased`, `purchasedAt`, `purchaseSessionId`, `purchaseAmount` | webhook de Stripe | Compró |
-| `followUpSentAt`, `unsubscribed`, `unsubscribedAt` | cron de seguimiento / baja | Correo de seguimiento |
-| `appointmentBooked` | `/admin` | Marcado a mano |
-
-### `clientes` — un documento por pago (id = sesión de Stripe)
-`stripeSessionId`, `leadId`, `email`, `name`, `company`, `amount`, `currency`, `variant`, `levelNum`, `attribution`, `paymentLink`, `livemode`, `createdAt`, `purchaseEmailSentAt` / `purchaseEmailError`.
-
----
-
-## 5. Opcional — dominio propio `assessment.infinixe.co`
-Da más confianza y permite que Pixel/GA reconozcan a la misma persona entre landing y assessment. **Requiere cambiar los links de la landing**, así que lo decide quien la mantiene. Si se hace:
-1. Vercel (proyecto `infinixe-ima`) → Settings → Domains → agregar `assessment.infinixe.co`.
-2. Wix (DNS de `infinixe.co`): CNAME · host `assessment` · valor el que indique Vercel (normalmente `cname.vercel-dns.com`).
-3. Landing: botones «Assessment gratuito» → `https://assessment.infinixe.co/`.
-4. Vercel: `NEXT_PUBLIC_VSL_URL=https://assessment.infinixe.co/vsl` y `NEXT_PUBLIC_SITE_URL=https://assessment.infinixe.co` + redeploy.
-5. Stripe: cambiar las URLs de §3.1 y §3.2 al nuevo dominio. Firebase: agregar el dominio en Dominios autorizados.
-
----
-
-## 6. Dónde vive cada cosa
-- **Repo:** `github.com/TheInfinixe/infinixe-ima` — Next.js 14 (App Router, JavaScript). Push a `main` = producción; otras ramas = preview (protegido con login de Vercel).
-- **Vercel:** team `isabel-plyg's projects` → proyecto **`infinixe-ima`** → `infinixe-ima.vercel.app`.
-- **Landing:** `ima.infinixe.co` en Netlify (no es parte de este repo).
-- **Video:** Vercel Blob, store `infinixe-vsl-video` → `https://isclmsuyunbjrocp.public.blob.vercel-storage.com/vsl/vsl-julio-h264.mp4` · original en Drive: <https://drive.google.com/file/d/1ZPaWK5GCHTThiadvxmh0Z_6SgyqkhcR2/view>
-
-### Archivos clave
-| Archivo | Qué hace |
-|---|---|
-| `app/page.js` | Assessment (cuestionario, resultados, guardado del lead) |
-| `app/vsl/VslPage.js` · `app/vsl/page.js` · `app/vsl-b/page.js` | VSL y sus variantes A ($450) y B ($350) |
-| `middleware.js` · `lib/ab.js` | Reparto del A/B |
-| `app/gracias/` | Página post-pago |
-| `app/admin/page.js` | Panel con login, leads, clientes y A/B |
-| `app/api/send-results` | Correo de resultados |
-| `app/api/stripe-webhook` | Pagos → clientes + correo de compra |
-| `app/api/cron/followup` · `app/api/unsubscribe` | Seguimiento a 24 h y baja |
-| `app/api/vsl-event` · `app/api/check-email` | Registro del A/B y verificación de email duplicado |
-| `lib/attribution.js` · `lib/tracking.js` | UTMs/link de Stripe y Pixel/GA |
-| `lib/email-*.js` · `lib/mailer.js` | Plantillas y envío de correos |
-| `lib/questions-pdf.js` · `lib/ima-full-questions.json` · `scripts/build-questions-pdf.mjs` | PDF con todas las preguntas del IMA Completo (adjunto del correo de compra) |
-| `emails/` | Vista previa de los 3 correos + el PDF del cuestionario |
-| `firestore.rules` | Reglas de seguridad de la base |
-
-### Variables de entorno (Vercel, proyecto `infinixe-ima`)
-Lista completa para cargar en la cuenta de Chris (Production y Preview). La plantilla está en `.env.local.example`.
-
-| Variable | De dónde sale el valor |
-|---|---|
-| `NEXT_PUBLIC_FIREBASE_API_KEY`, `_AUTH_DOMAIN`, `_PROJECT_ID`, `_STORAGE_BUCKET`, `_MESSAGING_SENDER_ID`, `_APP_ID` | Firebase → ⚙ Configuración del proyecto → Tus apps → app web (configuración del SDK) |
-| `FIREBASE_SERVICE_ACCOUNT` | Firebase → Cuentas de servicio → Generar nueva clave privada (el JSON completo en una línea) |
-| `GMAIL_USER`, `GMAIL_APP_PASSWORD` | Cuenta remitente elegida + su contraseña de aplicación |
-| `EMAILJS_SERVICE_ID`, `EMAILJS_TEMPLATE_ID`, `EMAILJS_TEMPLATE_ID_EN`, `EMAILJS_PUBLIC_KEY`, `EMAILJS_PRIVATE_KEY` | Cuenta de EmailJS (respaldo; opcional) |
-| `NEXT_PUBLIC_STRIPE_LINK_450`, `NEXT_PUBLIC_STRIPE_LINK_350` | Stripe → Enlaces de pago (los mismos de hoy) |
-| `STRIPE_WEBHOOK_SECRET` | Stripe → Webhooks → endpoint `/api/stripe-webhook` → Signing secret |
-| `NEXT_PUBLIC_META_PIXEL_ID` | `639402398659793` (mismo de la landing) |
-| `NEXT_PUBLIC_GA_ID` | `G-PS5BHPJBFL` (mismo de la landing) |
-| `NEXT_PUBLIC_VSL_VIDEO_SRC` | URL del video en su Blob store |
-| `BLOB_READ_WRITE_TOKEN` | Automática al conectar el Blob store |
-| `CRON_SECRET`, `UNSUBSCRIBE_SECRET` | `openssl rand -hex 32` |
-| `NEXT_PUBLIC_VSL_CTA_DELAY` | Opcional; sin definir = 120 s (oferta a los 2:00) |
-| `NEXT_PUBLIC_VSL_URL`, `NEXT_PUBLIC_SITE_URL` | Opcionales; sin definir = `https://infinixe-ima.vercel.app`. Cambiar si cambia el dominio |
-| `VSL_FORCE_VARIANT` | Opcional; sin definir = A/B activo. `a` o `b` para fijar un precio |
+| `NEXT_PUBLIC_FIREBASE_API_KEY`, `_AUTH_DOMAIN`, `_PROJECT_ID`, `_STORAGE_BUCKET`, `_MESSAGING_SENDER_ID`, `_APP_ID` | Firebase `infinixe-ima-535f8` → ⚙ Configuración → Tus apps → app web | Sí |
+| `FIREBASE_SERVICE_ACCOUNT` | Clave de cuenta de servicio (JSON completo, una línea) | Sí |
+| `GMAIL_USER`, `GMAIL_APP_PASSWORD` | Cuenta remitente + contraseña de aplicación | Sí |
+| `EMAILJS_SERVICE_ID`, `EMAILJS_TEMPLATE_ID`, `EMAILJS_TEMPLATE_ID_EN`, `EMAILJS_PUBLIC_KEY`, `EMAILJS_PRIVATE_KEY` | Cuenta de EmailJS (respaldo) | No |
+| `NEXT_PUBLIC_STRIPE_LINK_450`, `NEXT_PUBLIC_STRIPE_LINK_350` | Stripe → Enlaces de pago | Sí |
+| `STRIPE_WEBHOOK_SECRET` | Stripe → Webhooks → Signing secret | Sí (activa clientes, correo de compra y seguimiento) |
+| `NEXT_PUBLIC_META_PIXEL_ID` | `639402398659793` | Sí |
+| `NEXT_PUBLIC_GA_ID` | `G-PS5BHPJBFL` | Sí |
+| `NEXT_PUBLIC_VSL_VIDEO_SRC` | URL del video en el Blob store | Sí |
+| `BLOB_READ_WRITE_TOKEN` | Se crea sola al conectar el Blob store | Automática |
+| `CRON_SECRET`, `UNSUBSCRIBE_SECRET` | `openssl rand -hex 32` (uno distinto para cada una) | Sí |
+| `NEXT_PUBLIC_VSL_CTA_DELAY` | Segundos hasta la oferta; sin definir = 120 | No |
+| `NEXT_PUBLIC_VSL_URL` | URL del VSL para el correo de resultados; sin definir = `https://infinixe-ima.vercel.app/vsl` | Si cambia el dominio |
+| `NEXT_PUBLIC_SITE_URL` | Base de los enlaces de baja; sin definir = `https://infinixe-ima.vercel.app` | Si cambia el dominio |
+| `VSL_FORCE_VARIANT` | `a` o `b` para cerrar el A/B; sin definir = A/B activo | No |
 
 Las `NEXT_PUBLIC_*` se leen al compilar: cualquier cambio requiere redeploy.
+Variables del IMA Completo: las 6 `NEXT_PUBLIC_FIREBASE_*` de su proyecto (ver su `HANDOFF.md`).
 
 ---
 
-## 7. Video — notas técnicas
-- **Debe ser H.264.** El original venía en HEVC/H.265 (iPhone): en Chrome/Edge de Windows solo se escuchaba. Para reemplazarlo:
-  ```bash
-  ffmpeg -i entrada.mp4 -c:v libx264 -preset slow -crf 22 -maxrate 5M -bufsize 10M -profile:v high -pix_fmt yuv420p -c:a aac -b:a 160k -movflags +faststart salida.mp4
-  vercel blob put salida.mp4 --access public --pathname vsl/<nombre-nuevo>.mp4 --rw-token <BLOB_READ_WRITE_TOKEN>
-  ```
-- Subir con **nombre nuevo** (el CDN cachea 30 días) y actualizar `NEXT_PUBLIC_VSL_VIDEO_SRC`.
+## 11. Archivos clave (repo del funnel)
 
-## 8. Probar en local
+| Archivo | Qué hace |
+|---|---|
+| `app/page.js` | IMA gratuito: cuestionario, resultados, guardado del lead, captura de UTMs |
+| `app/vsl/VslPage.js` · `app/vsl/page.js` · `app/vsl-b/page.js` | VSL y sus variantes |
+| `middleware.js` · `lib/ab.js` | Reparto del A/B |
+| `app/gracias/` | Página después del pago |
+| `app/admin/page.js` | Panel con login, leads, clientes y A/B |
+| `app/api/send-results/route.js` | Correo de resultados (Gmail + PDF, respaldo EmailJS) |
+| `app/api/stripe-webhook/route.js` | Pagos → clientes + correo de compra |
+| `app/api/cron/followup/route.js` · `app/api/unsubscribe/route.js` · `vercel.json` | Seguimiento diario y bajas |
+| `app/api/vsl-event/route.js` · `app/api/check-email/route.js` | Registro del A/B y verificación de email duplicado |
+| `lib/attribution.js` · `lib/tracking.js` | UTMs y link de Stripe · Meta Pixel y GA4 |
+| `lib/firebase.js` · `lib/firebase-admin.js` | Firebase en el navegador · Firebase en el servidor |
+| `lib/email-template.js` · `lib/email-purchase.js` · `lib/email-followup.js` · `lib/mailer.js` · `lib/unsubscribe.js` | Correos |
+| `lib/report-pdf.js` · `lib/questions-pdf.js` · `lib/ima-full-questions.json` · `scripts/build-questions-pdf.mjs` | PDFs (resultado y cuestionario) |
+| `firestore.rules` | Reglas de seguridad de la base del funnel |
+| `emails/` | Vista previa de los 3 correos + PDF del cuestionario |
+| `emailjs-templates/` | Plantillas del respaldo EmailJS |
+
+---
+
+## 12. Operación diaria y cambios frecuentes
+
+| Quiero… | Cómo |
+|---|---|
+| Ver leads, clientes y el A/B | `/admin` |
+| Ver pagos | Stripe → Pagos (cada uno con `client_reference_id` = id del lead) |
+| Ver errores | Vercel → proyecto → Logs (filtrar por `/api/...`) |
+| Fijar un precio (terminar el A/B) | `VSL_FORCE_VARIANT=a` o `b` + redeploy |
+| Cambiar los precios | Crear nuevos Payment Links en Stripe → `NEXT_PUBLIC_STRIPE_LINK_*` + cambiar `price` en `app/vsl/page.js` / `app/vsl-b/page.js` y `VARIANT_PRICES` en `lib/ab.js` |
+| Cambiar cuándo aparece la oferta | `NEXT_PUBLIC_VSL_CTA_DELAY` (segundos) + redeploy |
+| Cambiar el video | Re-codificar a H.264 y subir con nombre nuevo (§14) → `NEXT_PUBLIC_VSL_VIDEO_SRC` |
+| Cambiar textos de los correos | `lib/email-*.js` (los acentos van como entidades HTML: `&oacute;`…) y regenerar las vistas previas de `emails/` |
+| Cambiar el texto de la página de gracias | `app/gracias/GraciasContent.js` |
+| Dar acceso a `/admin` | Cualquier cuenta Google `@infinixe.co` verificada entra sola |
+| Reenviar un correo de compra | Stripe → Webhooks → evento → «Reenviar». No duplica si ya salió |
+
+---
+
+## 13. Riesgos y problemas conocidos
+
+| Situación | Qué pasa / qué hacer |
+|---|---|
+| Video que solo se escucha | El MP4 está en HEVC/H.265 (iPhone). Debe ser **H.264** (§14) |
+| No se puede crear la clave de servicio | Política de la organización: ver fase 3 |
+| `/admin` dice «dominio no autorizado» | Agregar el dominio en Firebase → Authentication → Dominios autorizados |
+| `/admin` dice «acceso con Google no habilitado» | Habilitar Google en Authentication → Método de acceso |
+| Los leads se guardan sin `attribution` | Las reglas publicadas no permiten ese campo: usar `firestore.rules` de este repo |
+| No salen correos | Revisar `GMAIL_USER` / `GMAIL_APP_PASSWORD` y Vercel → Logs. El correo de resultados cae a EmailJS si Gmail falla |
+| No se registran compras | Revisar el webhook en Stripe (entregas fallidas), `STRIPE_WEBHOOK_SECRET` y `FIREBASE_SERVICE_ACCOUNT` |
+| El seguimiento no se envía | Requiere `STRIPE_WEBHOOK_SECRET`, `UNSUBSCRIBE_SECRET`, `CRON_SECRET` y `FIREBASE_SERVICE_ACCOUNT`. Solo leads de 1 a 7 días, en español, sin compra |
+| Leads en inglés | El VSL y el seguimiento están solo en español; el correo de resultados en inglés también enlaza al VSL en español |
+| Leads antiguos | Los 36 leads de julio de 2026 quedan fuera del seguimiento por la ventana de 7 días |
+| El email ya hizo el test | El test bloquea emails repetidos (verificación en el servidor). Para repetir pruebas, usar otro correo o borrar el lead |
+| Repos privados en Vercel Hobby | Ver fase 2 |
+| La landing | No se modifica desde aquí; sus botones apuntan a `https://infinixe-ima.vercel.app/` |
+
+---
+
+## 14. Video: notas técnicas
+- **Debe ser H.264.** El original venía en HEVC (iPhone) y en Chrome/Edge de Windows solo se escuchaba. Original en Drive: <https://drive.google.com/file/d/1ZPaWK5GCHTThiadvxmh0Z_6SgyqkhcR2/view>
+- Re-codificar y subir con **nombre nuevo**, porque el CDN cachea 30 días:
+```bash
+ffmpeg -i entrada.mp4 -c:v libx264 -preset slow -crf 22 -maxrate 5M -bufsize 10M -profile:v high -pix_fmt yuv420p -c:a aac -b:a 160k -movflags +faststart salida.mp4
+vercel blob put salida.mp4 --access public --pathname vsl/<nombre-nuevo>.mp4 --rw-token <BLOB_READ_WRITE_TOKEN>
+```
+- El reproductor usa `NEXT_PUBLIC_VSL_VIDEO_SRC`. Si está vacía, prueba con `NEXT_PUBLIC_VSL_VIDEO_ID` (YouTube) y, si tampoco hay, muestra un aviso.
+
+## 15. Probar en local
 ```bash
 npm install
 npm run dev
-# Assessment:  http://localhost:3000/?utm_source=facebook&utm_campaign=prueba
-# VSL A / B:   http://localhost:3000/vsl?v=a&cta=1   ·   http://localhost:3000/vsl?v=b&cta=1
-# Gracias:     http://localhost:3000/gracias?p=450
+# IMA gratuito:  http://localhost:3000/?utm_source=facebook&utm_campaign=prueba
+# VSL A / B:     http://localhost:3000/vsl?v=a&cta=1   ·   http://localhost:3000/vsl?v=b&cta=1
+# Gracias:       http://localhost:3000/gracias?p=450
+# Vistas previas de correos y PDF: carpeta emails/
 ```
-Sin `NEXT_PUBLIC_META_PIXEL_ID` / `NEXT_PUBLIC_GA_ID` en `.env.local` no se envía nada a Meta ni a Google (recomendado en local).
+- Copiar `.env.local.example` a `.env.local`.
+- Dejar vacías `NEXT_PUBLIC_META_PIXEL_ID` y `NEXT_PUBLIC_GA_ID` para no enviar eventos de prueba.
+- Las rutas `/api/*` necesitan `FIREBASE_SERVICE_ACCOUNT` y las credenciales de Gmail.
 
-## 9. Continuar con Claude Code
-Abrir el repo en Claude Code y pegar:
-> Lee `HANDOFF-VSL.md` en la raíz del repo. Ayúdame con los pasos pendientes de la sección 3. Pregúntame lo que necesites antes de cambiar algo.
+## 16. Continuar con Claude Code
+Abrir este repo en Claude Code y pegar:
+> Lee `HANDOFF-VSL.md` completo. Soy Chris, el dueño del proyecto. Ayúdame a completar la §8 (setup) fase por fase en mis cuentas, empezando por la que esté pendiente. Antes de cambiar código o configuración, explícame qué vas a hacer y pregúntame lo que necesites.
+
+Para el IMA Completo, abrir su repo y usar el prompt de su `HANDOFF.md`.

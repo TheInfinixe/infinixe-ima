@@ -8,8 +8,8 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 // ─── CORREO DE SEGUIMIENTO (cron diario, ver vercel.json) ────────────────────
-// Envía UNA vez el correo de seguimiento a quien terminó el test hace entre 24 h y 7 días,
-// no compró y no se dio de baja. La ventana de 7 días evita escribir a leads antiguos.
+// Envía UNA vez el correo de seguimiento a quien terminó el test (en español) hace entre
+// 24 h y 7 días, no compró y no se dio de baja. La ventana de 7 días evita escribir a leads antiguos.
 // No corre si el webhook de Stripe no está configurado: sin datos de compra
 // le escribiría también a quien sí compró.
 const DAY = 24 * 60 * 60 * 1000;
@@ -35,9 +35,10 @@ export async function GET(request) {
     .get();
 
   const vslBase = process.env.NEXT_PUBLIC_VSL_URL || "https://infinixe-ima.vercel.app/vsl";
+  // El VSL y este correo están solo en español: no se envía a quien hizo el test en inglés.
   const pending = snap.docs.filter((d) => {
     const a = d.data();
-    return a.email && !a.purchased && !a.followUpSentAt && !a.unsubscribed;
+    return a.email && a.lang !== "en" && !a.purchased && !a.followUpSentAt && !a.unsubscribed;
   });
 
   let sent = 0;

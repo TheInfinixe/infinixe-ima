@@ -56,7 +56,10 @@ export async function POST(request) {
 
   const session = event.data.object;
   // Pagos que se confirman después (transferencias, OXXO…) llegan luego como async_payment_succeeded.
-  if (session.payment_status !== "paid") return NextResponse.json({ received: true, pending: true });
+  // "no_payment_required" = compra con cupón del 100 % (cortesía o prueba): también es cliente.
+  if (session.payment_status !== "paid" && session.payment_status !== "no_payment_required") {
+    return NextResponse.json({ received: true, pending: true });
+  }
 
   const db = adminDb();
   const clienteRef = db.collection("clientes").doc(session.id);

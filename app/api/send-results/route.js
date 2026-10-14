@@ -25,8 +25,10 @@ const RIESGO_EN = [
   "At the Sustainable level the challenge is sustaining it: keeping the innovative mindset alive and expanding the impact to the ecosystem.",
 ];
 
-// --- Fallback: legacy EmailJS flow (kept as-is, no attachment) --------
-async function sendViaEmailJS({ name, email, company, results, lang, isEn, levelName, strategizePct, managePct, feedPct }) {
+// --- Fallback: EmailJS (no attachment) ---------------------------------
+// Sends the same data as the main Gmail email so EmailJS can use the v2 templates
+// (emailjs-templates/v2-template-*.html), whose CTA goes to the VSL.
+async function sendViaEmailJS({ name, email, company, results, lang, isEn, levelName, strategizePct, managePct, feedPct, riesgo, vslUrl }) {
   const templateParams = {
     user_name: name,
     user_email: email,
@@ -40,8 +42,8 @@ async function sendViaEmailJS({ name, email, company, results, lang, isEn, level
     estado: results.estado,
     paso: results.paso,
     lang: lang || "es",
-    // CTA link for the neutral cold-outreach template
-    calendly_url: "https://calendly.com/infinixe/sesion-con-infinixe-1",
+    riesgo: riesgo,
+    vsl_url: vslUrl,
   };
 
   // Use the English template when the user took the assessment in English
@@ -194,6 +196,8 @@ export async function POST(request) {
       strategizePct,
       managePct,
       feedPct,
+      riesgo,
+      vslUrl,
     });
     console.log(`send-results: sent via EmailJS fallback (emailSent=${emailSent})`);
 
