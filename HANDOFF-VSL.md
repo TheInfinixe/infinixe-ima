@@ -23,7 +23,7 @@ Código: <https://github.com/TheInfinixe/infinixe-ima> (público).
 | Cuenta que envía los correos (Gmail SMTP) | La configurada hoy en `GMAIL_USER` | Chris elige la cuenta remitente y crea su contraseña de aplicación (ver «Correos») |
 | EmailJS (respaldo del correo de resultados) | Cuenta configurada en `EMAILJS_*` | Chris crea su cuenta con las plantillas de `emailjs-templates/`, o elimina el respaldo |
 | Stripe, Meta Pixel, GA4, landing (Netlify), DNS (Wix) | Ya son de Infinixe / Chris | Sin cambios |
-| IMA full version (el correo de compra enlaza a su `/cuestionario`) | Vercel y GitHub de Isabel (`infinixe-ima-fullversion`) | Si también se migra y cambia su URL, actualizar `IMA_FULL_DEMO_URL` en `lib/email-purchase.js` |
+| IMA full version (el correo de compra enlaza a su `/cuestionario`) | Vercel y GitHub de Isabel (`infinixe-ima-fullversion`) | Si también se migra y cambia su URL, actualizar `IMA_FULL_DEMO_URL` en `lib/email-purchase.js` e `IMA_FULL_ONLINE` en `lib/questions-pdf.js`, y regenerar el PDF |
 
 ### Orden recomendado (sin cortar el funnel)
 1. **Firebase:** Isabel agrega a Chris como Propietario.
@@ -121,7 +121,13 @@ Anuncio (con UTMs)
 | Compra confirmada | Cuando Stripe confirma el pago (webhook). Responder llega a Chris | `lib/email-purchase.js` |
 | Seguimiento | Una vez, entre 24 h y 7 días después del test, si no compró ni se dio de baja | `lib/email-followup.js` |
 
-El correo de compra explica los siguientes pasos (Chris contacta, el IMA Completo se responde en equipo, sesión 1:1) y enlaza al IMA Completo de prueba: <https://infinixe-ima-fullversion.vercel.app/cuestionario> (navegable, no guarda respuestas).
+El correo de compra explica los siguientes pasos (Chris contacta, el IMA Completo se responde en equipo, sesión 1:1), enlaza al IMA Completo de prueba <https://infinixe-ima-fullversion.vercel.app/cuestionario> (navegable, no guarda respuestas) y **adjunta el PDF «IMA-Completo-Cuestionario.pdf»** con las 95 preguntas, para que el cliente lo tenga y lo comparta con su equipo.
+
+**PDF del cuestionario**
+- Se genera al enviar el correo con `lib/questions-pdf.js` a partir de `lib/ima-full-questions.json` (preguntas y opciones **sin puntajes**, porque este repo es público).
+- Copia lista para revisar o enviar a mano: `emails/IMA-Completo-Cuestionario.pdf`.
+- **Si cambian las preguntas del IMA full version** (`web/data/questions.json` de ese proyecto): volver a copiar `lib/ima-full-questions.json` (solo `id`, `elemento`, `pilar`, `subpilar`, `pregunta`, `tipo` y las etiquetas de las opciones) y correr `node scripts/build-questions-pdf.mjs`.
+- En los datos del full version hay dos nombres de categoría con errores: «Why  How What» (→ «Why, How & What») y «Metricas» (→ «Métricas»). El PDF los corrige al mostrarlos (`CATEGORY_FIXES` en `lib/questions-pdf.js`); conviene corregirlos también en el full version.
 El seguimiento corre a diario a las 16:00 UTC (`vercel.json`) y **no envía nada mientras el webhook de Stripe no esté configurado**: sin registro de compras le escribiría también a quien sí compró. La ventana de 7 días evita escribir a leads antiguos. Incluye un enlace para darse de baja.
 
 ### A/B de precio
@@ -233,6 +239,8 @@ Da más confianza y permite que Pixel/GA reconozcan a la misma persona entre lan
 | `app/api/vsl-event` · `app/api/check-email` | Registro del A/B y verificación de email duplicado |
 | `lib/attribution.js` · `lib/tracking.js` | UTMs/link de Stripe y Pixel/GA |
 | `lib/email-*.js` · `lib/mailer.js` | Plantillas y envío de correos |
+| `lib/questions-pdf.js` · `lib/ima-full-questions.json` · `scripts/build-questions-pdf.mjs` | PDF con todas las preguntas del IMA Completo (adjunto del correo de compra) |
+| `emails/` | Vista previa de los 3 correos + el PDF del cuestionario |
 | `firestore.rules` | Reglas de seguridad de la base |
 
 ### Variables de entorno (Vercel, proyecto `infinixe-ima`)

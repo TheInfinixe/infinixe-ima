@@ -4,6 +4,8 @@ import { adminDb, FieldValue } from "../../../lib/firebase-admin";
 import { isLeadId } from "../../../lib/ab";
 import { sendMail } from "../../../lib/mailer";
 import { CHRIS_EMAIL, purchaseEmailSubject, renderPurchaseEmail } from "../../../lib/email-purchase";
+import { generateQuestionsPdf, QUESTIONS_PDF_FILENAME } from "../../../lib/questions-pdf";
+import questionsData from "../../../lib/ima-full-questions.json";
 
 export const runtime = "nodejs";
 
@@ -103,12 +105,22 @@ export async function POST(request) {
 
   if (!email) return NextResponse.json({ received: true, emailSent: false });
 
+  // PDF con todas las preguntas del IMA Completo. Si fallara, el correo sale igual sin adjunto.
+  let attachments;
+  try {
+    const pdf = await generateQuestionsPdf(questionsData);
+    attachments = [{ filename: QUESTIONS_PDF_FILENAME, content: Buffer.from(pdf), contentType: "application/pdf" }];
+  } catch (e) {
+    console.error("stripe-webhook: questions PDF failed:", e);
+  }
+
   try {
     await sendMail({
       to: email,
       subject: purchaseEmailSubject(),
-      html: renderPurchaseEmail({ name, amount }),
+      html: renderPurchaseEmail({ name, amount, withPdf: !!attachments }),
       replyTo: CHRIS_EMAIL,
+      attachments,
     });
     await clienteRef.update({ purchaseEmailSentAt: FieldValue.serverTimestamp() });
   } catch (e) {
