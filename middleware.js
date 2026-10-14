@@ -1,26 +1,29 @@
 import { NextResponse } from "next/server";
+import { isLeadId, variantForLead } from "./lib/ab";
 
 // ─── A/B TEST DE PRECIO DEL VSL ─────────────────────────────────────────────
 // /vsl reparte 50/50 entre la variante A ($450, app/vsl) y la B ($350, app/vsl-b).
-// La asignación se guarda en una cookie: cada persona ve siempre el mismo precio,
-// también si vuelve desde el link del correo en el mismo navegador.
+// Orden de decisión:
+//   1) env var VSL_FORCE_VARIANT=a|b  → cierra el test (todos ven ese precio)
+//   2) ?v=a | ?v=b                     → pruebas manuales
+//   3) ?rid=<id del lead>              → variante fija por persona, en cualquier dispositivo
+//   4) cookie de una visita anterior   → visitantes sin id de lead
+//   5) al azar
 // La URL visible sigue siendo /vsl en ambos casos.
-// Para probar una variante a mano: /vsl?v=a  o  /vsl?v=b
-// Para terminar el test sin tocar código: env var VSL_FORCE_VARIANT=a (o b) en Vercel + redeploy.
 const COOKIE = "vsl_variant";
 const NINETY_DAYS = 60 * 60 * 24 * 90;
+const isVariant = (v) => v === "a" || v === "b";
 
 export function middleware(request) {
   const { searchParams } = request.nextUrl;
-  const winner = process.env.VSL_FORCE_VARIANT;
-  const forced = searchParams.get("v");
-  let variant =
-    winner === "a" || winner === "b"
-      ? winner
-      : forced === "a" || forced === "b"
-        ? forced
-        : request.cookies.get(COOKIE)?.value;
-  if (variant !== "a" && variant !== "b") variant = Math.random() < 0.5 ? "a" : "b";
+  const rid = searchParams.get("rid");
+  const cookie = request.cookies.get(COOKIE)?.value;
+
+  let variant = process.env.VSL_FORCE_VARIANT;
+  if (!isVariant(variant)) variant = searchParams.get("v");
+  if (!isVariant(variant) && isLeadId(rid)) variant = variantForLead(rid);
+  if (!isVariant(variant)) variant = cookie;
+  if (!isVariant(variant)) variant = Math.random() < 0.5 ? "a" : "b";
 
   const response =
     variant === "b"

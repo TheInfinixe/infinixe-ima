@@ -45,6 +45,19 @@ const STACK = [
 
 const gradientText = { background: TEXT_GRADIENT, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent", WebkitTextFillColor: "transparent" };
 
+// Guarda en el lead qué precio vio y si hizo clic en pagar (A/B en /admin).
+function logVslEvent(leadId, event, variant) {
+  if (!leadId) return;
+  try {
+    fetch("/api/vsl-event", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rid: leadId, event, variant }),
+      keepalive: true,
+    }).catch(() => {});
+  } catch {}
+}
+
 function Kicker({ children }) {
   return (
     <div style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 11, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: C.body }}>
@@ -76,6 +89,7 @@ function VslContent({ price, stripeUrl, variant }) {
     const attribution = captureAttribution();
     setCheckoutUrl(buildCheckoutUrl(stripeUrl, { leadId, attribution }));
     initTracking();
+    logVslEvent(leadId, "view", variant);
     track({
       metaEvent: "ViewContent",
       metaParams: { content_name: "VSL IMA", content_category: `variante_${variant}`, value: price, currency: "USD" },
@@ -96,13 +110,15 @@ function VslContent({ price, stripeUrl, variant }) {
     if (showCta) track({ gaEvent: "vsl_offer_shown", gaParams: { variant, price } });
   }, [showCta, variant, price]);
 
-  const onCheckoutClick = () =>
+  const onCheckoutClick = () => {
+    logVslEvent(leadId, "checkout", variant);
     track({
       metaEvent: "InitiateCheckout",
       metaParams: { content_name: "IMA Completo + sesión 1:1", value: price, currency: "USD" },
       gaEvent: "begin_checkout",
       gaParams: { variant, value: price, currency: "USD" },
     });
+  };
 
   return (
     <div className={montserrat.className} data-variant={variant} style={{ minHeight: "100vh", display: "flex", flexDirection: "column", color: C.ink, position: "relative", overflowX: "hidden" }}>

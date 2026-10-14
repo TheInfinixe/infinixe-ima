@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { db } from "../lib/firebase";
-import { collection, addDoc, query, where, getDocs, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { captureAttribution, readAttribution } from "../lib/attribution";
 import { initTracking, track } from "../lib/tracking";
 
@@ -18,7 +18,7 @@ const LEVELS = [
     paso: "Anticiparse y diseñar una planeación estratégica que permita priorizar las urgencias de la organización bajo una estructura y un orden de trabajo definidos.",
     pasoEn: "Get ahead of events and design strategic planning that prioritizes the organization's urgent needs within a defined structure and order of work." },
   { level: 2, name: "ESTRUCTURADA", nameEn: "STRUCTURED", minPct: 34, maxPct: 50,
-    estado: "Cuenta con procesos y equipos dedicados, integrados en la cultura organizacional de mejora y crecimiento. Existen una visión desde el portafolio.",
+    estado: "Cuenta con procesos y equipos dedicados, integrados en la cultura organizacional de mejora y crecimiento. Existe una visión desde el portafolio.",
     estadoEn: "It has dedicated processes and teams, integrated into an organizational culture of improvement and growth. There is a portfolio-level vision.",
     paso: "Optimizar el sistema para validar ideas de forma ágil y económica, comunicando las historias de éxito para inspirar y sumar al resto de la organización.",
     pasoEn: "Optimize the system to validate ideas quickly and affordably, sharing success stories to inspire and engage the rest of the organization." },
@@ -393,14 +393,17 @@ export default function Home() {
   const q = QUESTIONS[cQ];
   const lockedLabel = lang === "en" ? "LOCKED" : "BLOQUEADO";
 
-  // Check if email already used
+  // Check if email already used (server-side, the database is not readable from the browser)
   const checkEmail = async (email) => {
     try {
-      const ref = collection(db, "assessments");
-      const snap = await getDocs(query(ref, where("email", "==", email.toLowerCase().trim())));
-      return !snap.empty;
+      const res = await fetch("/api/check-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      return !!(await res.json()).exists;
     } catch (e) {
-      console.error("Firebase error:", e);
+      console.error("check-email error:", e);
       return false;
     }
   };
