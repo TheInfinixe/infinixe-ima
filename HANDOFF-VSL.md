@@ -437,6 +437,12 @@ npm run dev
    git clone https://github.com/ChrisBaumal/Infinixe-ima-fullversion.git
    ```
 
+> **Atajo:** los pasos 2 y 3 los puede hacer Claude Code. Basta con crear una carpeta vacía, abrirla en Claude Code y pegar el mensaje de abajo. Claude instala las herramientas, inicia los logins (tú solo los **apruebas en el navegador** con tu cuenta) y clona los repos:
+> ```
+> Prepara mi computadora para trabajar en el proyecto IMA: verifica que tenga Git y Node.js; instala la CLI de GitHub y la de Vercel si faltan; inicia `gh auth login` y `vercel login` (yo apruebo en el navegador); y clona en esta carpeta https://github.com/TheInfinixe/infinixe-ima y https://github.com/ChrisBaumal/Infinixe-ima-fullversion. Avísame antes de instalar cualquier cosa.
+> ```
+> El paso 1 (aceptar la transferencia del repo y tener acceso de Propietario en Firebase) solo lo puedes hacer tú.
+
 ### Mensaje para pegar en Claude Code
 ```
 Hola. Soy Chris (christian@infinixe.co), dueño del proyecto IMA de Infinixe. Isabel me está entregando todo el sistema y necesito que me ayudes a dejarlo funcionando en MIS cuentas.
