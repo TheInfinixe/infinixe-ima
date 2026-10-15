@@ -183,6 +183,8 @@ Orden pensado para que el funnel no se corte. Marcar cada casilla al terminar. L
 - [ ] Unidad compartida de Drive *IMA › Resultados*: Chris tiene acceso.
 
 ### Fase 2 — Vercel (los dos proyectos)
+> **Decisión (15 oct 2026):** Chris usa el plan **gratuito (Hobby)** de Vercel, así que los proyectos **no se pueden transferir** (los equipos Hobby no admiten miembros). Chris los **recrea** con el camino B. Isabel borra los suyos solo cuando los de Chris funcionen.
+
 Dos caminos, para cada proyecto:
 - **A) Transferir** (Settings → General → Transfer Project): requiere un team **Pro** de Chris con Isabel como miembro. Pasan deployments, variables, dominios, crons y la conexión con GitHub. **No** pasa el Blob store.
 - **B) Recrear** (cualquier plan): Add New → Project → importar el repo.
@@ -285,10 +287,10 @@ utm_source=facebook&utm_medium=paid&utm_campaign={{campaign.name}}&utm_term={{ad
 
 ### Isabel
 1. **GitHub:**
-   - Transferir `isabel-PLYG/Infinixe-ima-fullversion`, ya sea a la org `TheInfinixe` (requiere Vercel Pro) o a `ChrisBaumal` (funciona en Hobby). Detalle en `HANDOFF.md` del IMA Completo.
-   - El repo del funnel ya está en la org y Chris es admin.
+   - Transferir `isabel-PLYG/Infinixe-ima-fullversion` a **`ChrisBaumal`** (Chris usa Vercel gratuito, que solo despliega repos privados de la propia cuenta). Detalle en `HANDOFF.md` del IMA Completo.
+   - El repo del funnel (`TheInfinixe/infinixe-ima`) **no se transfiere**: ya está en la org y Chris es admin. GitHub solo permite pasar un repo de organización a la cuenta propia, por eso intentar transferirlo da el error «You can only transfer a repository from an organization to yourself».
 2. **Firebase:** agregar `christian@infinixe.co` como **Propietario** en `infinixe-ima-535f8` y en `infinixe-ima-fullversion`. Si alguno tiene facturación ligada a su cuenta, coordinar el cambio.
-3. **Vercel:** transferir los dos proyectos si Chris tiene Pro, o esperar a que Chris los recree. En ese caso, cuando los de Chris funcionen, **eliminar los suyos** (`infinixe-ima`, `infinixe-ima-fullversion`) para liberar las URLs `*.vercel.app`, y luego el Blob store `infinixe-vsl-video`.
+3. **Vercel:** nada que transferir, porque Chris usa el plan gratuito y recrea los proyectos. Cuando los de Chris funcionen, **eliminar los suyos** (`infinixe-ima`, `infinixe-ima-fullversion`) para liberar las URLs `*.vercel.app` (Chris las agrega enseguida en *Settings → Domains*), y luego el Blob store `infinixe-vsl-video`.
 4. **Enviar a Chris:**
    - El link del repo del funnel y del PR #2.
    - Este documento y el `HANDOFF.md` del IMA Completo.
