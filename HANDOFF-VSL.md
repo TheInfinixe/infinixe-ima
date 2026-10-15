@@ -421,7 +421,46 @@ npm run dev
 - Las rutas `/api/*` necesitan `FIREBASE_SERVICE_ACCOUNT` y las credenciales de Gmail.
 
 ## 16. Continuar con Claude Code
-Abrir este repo en Claude Code y pegar:
-> Lee `HANDOFF-VSL.md` completo. Soy Chris, el dueño del proyecto. Ayúdame a completar la §8 (setup) fase por fase en mis cuentas, empezando por la que esté pendiente. Antes de cambiar código o configuración, explícame qué vas a hacer y pregúntame lo que necesites.
 
-Para el IMA Completo, abrir su repo y usar el prompt de su `HANDOFF.md`.
+### Antes de empezar
+1. Aceptar la transferencia del repo del IMA Completo (correo de GitHub) y confirmar que Isabel ya te agregó como **Propietario** en los dos proyectos de Firebase.
+2. Tener instalados Git, Node.js, la CLI de GitHub y la CLI de Vercel, con sesión iniciada:
+   ```bash
+   gh auth login
+   npm i -g vercel
+   vercel login
+   ```
+3. Clonar los dos repos en una misma carpeta y abrir **esa carpeta** en Claude Code:
+   ```bash
+   mkdir infinixe-ima-sistema && cd infinixe-ima-sistema
+   git clone https://github.com/TheInfinixe/infinixe-ima.git
+   git clone https://github.com/ChrisBaumal/Infinixe-ima-fullversion.git
+   ```
+
+### Mensaje para pegar en Claude Code
+```
+Hola. Soy Chris (christian@infinixe.co), dueño del proyecto IMA de Infinixe. Isabel me está entregando todo el sistema y necesito que me ayudes a dejarlo funcionando en MIS cuentas.
+
+En esta carpeta están los dos repos:
+- infinixe-ima: el funnel (IMA gratuito, VSL, pagos con Stripe, correos, panel /admin). Documento maestro: HANDOFF-VSL.md
+- Infinixe-ima-fullversion: el IMA Completo (95 preguntas, panel del equipo). Documentos: HANDOFF.md, README.md y docs/ARCHITECTURE.md
+
+Contexto:
+- Mi Vercel es el plan gratuito (Hobby): los dos proyectos se RECREAN en mi cuenta, no se transfieren.
+- Ya tengo acceso: soy admin de la org TheInfinixe, el repo del IMA Completo está en mi cuenta y soy Propietario de los dos proyectos de Firebase (infinixe-ima-535f8 e infinixe-ima-fullversion).
+- La landing ima.infinixe.co no se toca.
+
+Lo que necesito:
+1. Lee completos HANDOFF-VSL.md y HANDOFF.md, y los archivos que mencionan, antes de hacer cualquier cosa.
+2. Dame un resumen corto de cómo funciona todo y una lista de verificación con todas las fases de la §8 de HANDOFF-VSL.md y la §6 de HANDOFF.md. Marca cuáles ya están hechas y cuáles no; compruébalo tú cuando puedas (con gh, la CLI de Vercel o abriendo las URLs).
+3. Guíame fase por fase, en el orden del documento. En cada fase: explícame qué vamos a hacer y por qué, qué necesitas de mí, hazlo o dime exactamente dónde hacer clic, y verifica que funciona antes de pasar a la siguiente.
+
+Reglas:
+- Antes de cambiar código o configuración, hacer merge o push, explícame qué vas a hacer y espera mi confirmación.
+- No me pidas pegar contraseñas ni llaves en el chat: dime en qué pantalla de Vercel, Firebase o Stripe las pego yo.
+- Respeta el orden del documento. En especial: el PR #2 (https://github.com/TheInfinixe/infinixe-ima/pull/2) no se mergea hasta que Firebase tenga el login de Google y la clave de servidor; el webhook de Stripe apunta al dominio de producción; Isabel no borra sus proyectos de Vercel hasta que los míos funcionen.
+- Si algo no coincide con la documentación, o un paso falla, avísame antes de seguir.
+- Al final de cada sesión, dime en qué fase quedamos y qué falta.
+```
+
+**Para retomar otro día:** «Lee HANDOFF-VSL.md y HANDOFF.md y continuemos el setup desde la fase X; antes, comprueba que lo anterior siga funcionando.»
