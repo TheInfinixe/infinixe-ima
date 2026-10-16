@@ -1,0 +1,37 @@
+rules_version = '2';
+
+// Reglas de Firestore del IMA beta (proyecto infinixe-ima-535f8).
+// Se publican en Firebase → Firestore Database → Reglas.
+// Las rutas de API del servidor usan el Admin SDK y no pasan por estas reglas.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Equipo Infinixe: login con Google @infinixe.co (panel /admin).
+    function isStaff() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email.matches('.*@infinixe[.]co$');
+    }
+
+    // Leads del assessment: cualquiera puede CREAR el suyo al terminar el test;
+    // solo el equipo puede leerlos o editarlos.
+    match /assessments/{id} {
+      allow create: if request.resource.data.keys().hasOnly(
+                         ['name', 'email', 'company', 'answers', 'results', 'lang', 'createdAt', 'attribution'])
+                    && request.resource.data.email is string
+                    && request.resource.data.email.size() <= 254;
+      allow read, update, delete: if isStaff();
+    }
+
+    // Clientes (compras): los escribe solo el webhook de Stripe desde el servidor.
+    match /clientes/{id} {
+      allow read: if isStaff();
+      allow write: if false;
+    }
+
+    // Todo lo demás, cerrado.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

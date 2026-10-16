@@ -1,7 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
 import { db } from "../lib/firebase";
-import { collection, addDoc, query, where, getDocs, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { captureAttribution, readAttribution } from "../lib/attribution";
+import { initTracking, track } from "../lib/tracking";
 
 // ─── LEVELS ─────────────────────────────────────────────────────────────────
 const LEVELS = [
@@ -16,7 +18,7 @@ const LEVELS = [
     paso: "Anticiparse y diseñar una planeación estratégica que permita priorizar las urgencias de la organización bajo una estructura y un orden de trabajo definidos.",
     pasoEn: "Get ahead of events and design strategic planning that prioritizes the organization's urgent needs within a defined structure and order of work." },
   { level: 2, name: "ESTRUCTURADA", nameEn: "STRUCTURED", minPct: 34, maxPct: 50,
-    estado: "Cuenta con procesos y equipos dedicados, integrados en la cultura organizacional de mejora y crecimiento. Existen una visión desde el portafolio.",
+    estado: "Cuenta con procesos y equipos dedicados, integrados en la cultura organizacional de mejora y crecimiento. Existe una visión desde el portafolio.",
     estadoEn: "It has dedicated processes and teams, integrated into an organizational culture of improvement and growth. There is a portfolio-level vision.",
     paso: "Optimizar el sistema para validar ideas de forma ágil y económica, comunicando las historias de éxito para inspirar y sumar al resto de la organización.",
     pasoEn: "Optimize the system to validate ideas quickly and affordably, sharing success stories to inspire and engage the rest of the organization." },
@@ -379,39 +381,60 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [blocked, setBlocked] = useState(false);
   const [regError, setRegError] = useState("");
+  const [leadId, setLeadId] = useState(null); // id del documento en Firestore; viaja al VSL y a Stripe
+
+  // Guarda los UTMs que reenvía la landing y carga Meta Pixel + GA.
+  useEffect(() => {
+    captureAttribution();
+    initTracking();
+  }, []);
 
   const t = STR[lang];
   const q = QUESTIONS[cQ];
   const lockedLabel = lang === "en" ? "LOCKED" : "BLOQUEADO";
 
-  // Check if email already used
+  // Check if email already used (server-side, the database is not readable from the browser)
   const checkEmail = async (email) => {
     try {
-      const ref = collection(db, "assessments");
-      const snap = await getDocs(query(ref, where("email", "==", email.toLowerCase().trim())));
-      return !snap.empty;
+      const res = await fetch("/api/check-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      return !!(await res.json()).exists;
     } catch (e) {
-      console.error("Firebase error:", e);
+      console.error("check-email error:", e);
       return false;
     }
   };
 
-  // Save assessment to Firebase
+  // Save assessment to Firebase. Returns the new document id (or null).
   const saveAssessment = async (results) => {
+    const doc = {
+      name: user.name,
+      email: user.email.toLowerCase().trim(),
+      company: user.company,
+      answers: ans,
+      results: results,
+      lang: lang,
+      createdAt: serverTimestamp(),
+    };
+    const attribution = readAttribution();
     try {
-      await addDoc(collection(db, "assessments"), {
-        name: user.name,
-        email: user.email.toLowerCase().trim(),
-        company: user.company,
-        answers: ans,
-        results: results,
-        lang: lang,
-        createdAt: serverTimestamp(),
-      });
-      return true;
+      const ref = await addDoc(collection(db, "assessments"), Object.keys(attribution).length ? { ...doc, attribution } : doc);
+      return ref.id;
     } catch (e) {
       console.error("Firebase save error:", e);
-      return false;
+      // Si las reglas de Firestore rechazaran el campo nuevo, el lead se guarda igual sin atribución.
+      if (Object.keys(attribution).length) {
+        try {
+          const ref = await addDoc(collection(db, "assessments"), doc);
+          return ref.id;
+        } catch (e2) {
+          console.error("Firebase save error (retry without attribution):", e2);
+        }
+      }
+      return null;
     }
   };
 
@@ -468,7 +491,15 @@ export default function Home() {
     const lvl = getLevel(oPct);
     // Stored canonical in Spanish so the admin dashboard stays consistent regardless of user's language.
     const resultData = { pillarScores: pl, overallPct: oPct, level: lvl.name, levelNum: lvl.level, estado: lvl.estado, paso: lvl.paso };
-    await saveAssessment(resultData);
+    const id = await saveAssessment(resultData);
+    setLeadId(id);
+    // Conversión "test completado" (la landing ya usa Lead para el clic en su botón).
+    track({
+      metaEvent: "CompleteRegistration",
+      metaParams: { content_name: "IMA assessment", status: `nivel_${lvl.level}` },
+      gaEvent: "assessment_complete",
+      gaParams: { level: lvl.level, overall_pct: oPct, lang },
+    });
     // For the email, send the description text in the language the user chose.
     const emailResults = { pillarScores: pl, overallPct: oPct, levelNum: lvl.level, estado: lang === "en" ? lvl.estadoEn : lvl.estado, paso: lang === "en" ? lvl.pasoEn : lvl.paso };
     // Send email via API
@@ -476,7 +507,7 @@ export default function Home() {
       await fetch("/api/send-results", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: user.name, email: user.email, company: user.company, results: emailResults, lang: lang }),
+        body: JSON.stringify({ name: user.name, email: user.email, company: user.company, results: emailResults, lang: lang, rid: id }),
       });
     } catch (e) { console.error("Email error:", e); }
     setSent(true);
@@ -741,7 +772,7 @@ export default function Home() {
                 </div>
 
                 <button style={{ ...b1, background: "linear-gradient(135deg,#B388FF,#7C4DFF)", width: "100%", fontSize: 16, padding: "16px 32px" }}
-                  onClick={() => { const firstName = (user.name || "").trim().split(/\s+/)[0] || ""; window.location.href = `/vsl?lvl=${lvl.level}&n=${encodeURIComponent(firstName)}`; }}>
+                  onClick={() => { const firstName = (user.name || "").trim().split(/\s+/)[0] || ""; window.location.href = `/vsl?lvl=${lvl.level}&n=${encodeURIComponent(firstName)}${leadId ? `&rid=${leadId}` : ""}`; }}>
                   {t.book_btn}
                 </button>
                 <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 12, textAlign: "center", margin: "10px 0 0", lineHeight: 1.5 }}>

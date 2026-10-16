@@ -1,0 +1,1432 @@
+{
+ "_fuente": "IMA full version: web/data/questions.json (sin puntajes). Si cambian las preguntas allá, regenerar este archivo.",
+ "totalQuestions": 95,
+ "questions": [
+  {
+   "id": "Q01",
+   "elemento": "STRATEGIZE",
+   "pilar": "DEFINIR",
+   "subpilar": "Propósito",
+   "pregunta": "¿El propósito de la empresa está orientado a la generación de valor hacia los clientes?",
+   "tipo": "Única",
+   "opciones": [
+    "No hay un propósito definido en la organización",
+    "El propósito es la misión de quienes somos",
+    "El propósito contiene el valor único que crea la empresa",
+    "El propósito está orientado hacia los clientes",
+    "El propósito es breve, claro y conciso"
+   ]
+  },
+  {
+   "id": "Q02",
+   "elemento": "STRATEGIZE",
+   "pilar": "DEFINIR",
+   "subpilar": "Propósito",
+   "pregunta": "¿Las decisiones de la organización son congruentes con el propósito de la misma?",
+   "tipo": "Única",
+   "opciones": [
+    "No hay un propósito definido en la organización",
+    "Las decisiones se toman sólo buscando beneficios económicos",
+    "Las decisiones se toman buscando beneficios internos",
+    "Las decisiones se toman buscando beneficios internos y hacia el cliente",
+    "Las decisiones están alineadas al propósito y a la generación de valor a los actores internos y externos"
+   ]
+  },
+  {
+   "id": "Q03",
+   "elemento": "STRATEGIZE",
+   "pilar": "DEFINIR",
+   "subpilar": "Propósito",
+   "pregunta": "¿Las personas en la organización conocen, creen y actúan bajo el propósito?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No hay un propósito definido en la organización",
+    "Es bueno el servicio al cliente y se mejora por feedback de los mismos",
+    "Se fomentan los esfuerzos colaborativos para alcanzar objetivos",
+    "Se fomenta la sostenibilidad y la responsabilidad social",
+    "La cultura organizacional refleja el propósito de la organización",
+    "El propósito motiva a los colaboradores"
+   ]
+  },
+  {
+   "id": "Q04",
+   "elemento": "STRATEGIZE",
+   "pilar": "DEFINIR",
+   "subpilar": "Visión",
+   "pregunta": "¿La empresa tiene una visión de su futuro definida y alineada con su propósito?",
+   "tipo": "Única",
+   "opciones": [
+    "La visión y/o el propósito no están definidos en la organización",
+    "La visión de la empresa es ambigua, habla numéricamente de ventas y/o participación",
+    "La visión está conectada con el mercado y/o el entorno.",
+    "La visión es flexible para adaptarse a cambios futuros del entorno, y lo suficientemente específica para guiar las decisiones"
+   ]
+  },
+  {
+   "id": "Q05",
+   "elemento": "STRATEGIZE",
+   "pilar": "DEFINIR",
+   "subpilar": "Visión",
+   "pregunta": "¿La empresa desglosa su visión en destinos estratégicos a corto, mediano y largo largo plazo bien definidos?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No hay objetivos definidos en plazos en la empresa",
+    "Es claro lo que la empresa busca a corto plazo",
+    "Es claro lo que la empresa busca a mediano plazo",
+    "Es claro lo que la empresa busca a largo plazo",
+    "La visión de la empresa es coherente en los 3 plazos definidos",
+    "Los destinos estratégicos son sostenibles y evitan la obsolescencia"
+   ]
+  },
+  {
+   "id": "Q06",
+   "elemento": "STRATEGIZE",
+   "pilar": "DEFINIR",
+   "subpilar": "Why  How What",
+   "pregunta": "¿Los mandos altos están alineados a los métodos de alineación estratégica?",
+   "tipo": "Única",
+   "opciones": [
+    "No hay medios para la alineación estratégica de altos mandos",
+    "Los altos mandos se alinean sólo en situaciones críticas",
+    "Los altos mandos se alinean con una frecuencia fija",
+    "Las alineaciones de los altos mandos cuentan con una estructura estándar y tienen frecuencia fija"
+   ]
+  },
+  {
+   "id": "Q07",
+   "elemento": "STRATEGIZE",
+   "pilar": "DEFINIR",
+   "subpilar": "Why  How What",
+   "pregunta": "¿Los mandos medios proyectan el propósito y visión (why) junto con los destinos estratégicos (how) en objetivos concretos para sus equipos (what)?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "Los mandos medios no se involucran en los objetivos",
+    "Los mandos medios delegan balanceadamente las responsabilidades",
+    "La forma de comunicación de los mandos medios es clara y precisa",
+    "Los mandos medios comprenden cómo el propósito se transforma en el valor para el cliente",
+    "Los mandos medios definen objetivos alineados a los destinos estratégicos"
+   ]
+  },
+  {
+   "id": "Q08",
+   "elemento": "STRATEGIZE",
+   "pilar": "DEFINIR",
+   "subpilar": "Transformación cultural",
+   "pregunta": "¿Tu visión del futuro se refleja en una visión de cultura a futuro destacando las competencias a desarrollar?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se tiene planeado desarrollar competencias",
+    "Se tienen definidos los perfiles de puestos",
+    "Se tienen métricas definidas para medir la cultura",
+    "Se tienen definidas las competencias a desarrollar tanto individuales como de equipos",
+    "Se tiene un plan de crecimiento por cada rol en la empresa",
+    "La visión contempla una cultura sana"
+   ]
+  },
+  {
+   "id": "Q09",
+   "elemento": "STRATEGIZE",
+   "pilar": "DEFINIR",
+   "subpilar": "Transformación cultural",
+   "pregunta": "¿Los planes de formación y desarrollo de los mandos medios y operativos estan alineados con la visión de cultura?",
+   "tipo": "Única",
+   "opciones": [
+    "No hay planes de formación y desarrollo",
+    "Se depende del talento de las personas para tener personas competentes",
+    "Se forma a las personas solamente cuando es requerido por ausencia de personas clave",
+    "Se tienen mapeadas las competencias por rol y se miden constantemente",
+    "Se tienen definidos planes de formación y desarrollo para cada rol",
+    "Se tienen medios por los que se desarrolla constantemente a los colaboradores alineados al plan de formación y a la visión de la empresa"
+   ]
+  },
+  {
+   "id": "Q10",
+   "elemento": "STRATEGIZE",
+   "pilar": "DEFINIR",
+   "subpilar": "Transformación cultural",
+   "pregunta": "¿Los planes de formación y desarrollo de los mandos altos están alineados con la visión de cultura?",
+   "tipo": "Única",
+   "opciones": [
+    "No hay planes de formación y desarrollo",
+    "Se depende del talento de las personas para tener personas capaces, contratando gente nueva en vez de formarla",
+    "Se tienen mapeadas las competencias de los altos mandos y se miden constantemente",
+    "La empresa desarrolla constantemente a sus altos mandos",
+    "La empresa está a la vanguardia con tiene planes adaptados a las tendencias actuales con los cuales desarrolla a sus altos mandos"
+   ]
+  },
+  {
+   "id": "Q11",
+   "elemento": "STRATEGIZE",
+   "pilar": "EVALUAR",
+   "subpilar": "Necesidades de negocio",
+   "pregunta": "¿Identifican posibles necesidades de negocio mediante indicadores clave de desempeño (KPIs) bien definidos y medidos regularmente?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se miden las necesidades de negocio",
+    "Constantemente se miden las necesidades de negocio",
+    "Se tienen indicadores clave (KPI) definidos",
+    "Los indicadores (KPI) se miden constantemente",
+    "Los indicadores clave permiten evaluar la situación en la empresa eficientemente en cada área",
+    "Se tienen canales abiertos con los colaboradores para identificar necesidades de negocio"
+   ]
+  },
+  {
+   "id": "Q12",
+   "elemento": "STRATEGIZE",
+   "pilar": "EVALUAR",
+   "subpilar": "Necesidades de negocio",
+   "pregunta": "¿Definen a donde quieren llegar y cuales son las necesidades para cada una de las unidades de negocio?",
+   "tipo": "Única",
+   "opciones": [
+    "No se miden las necesidades de negocio",
+    "Se tienen objetivos estratégicos, tácticos y operativos definidos para cada unidad de negocio",
+    "Los objetivos contemplan las necesidades de negocio en los objetivos planteados en cada unidad de negocio",
+    "Se tienen indicadores que permiten evaluar el cumplimiento de los objetivos"
+   ]
+  },
+  {
+   "id": "Q13",
+   "elemento": "STRATEGIZE",
+   "pilar": "EVALUAR",
+   "subpilar": "Necesidades de negocio",
+   "pregunta": "¿Accionan oportunamente mejoras internas y evalúan el impacto de forma objetiva?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se hacen mejoras internas",
+    "Se identifican las oportunidades de mejora interna (necesidade de negocio) de forma constante",
+    "Se tienen indicadores con los cuales evaluar las necesidades de negocio",
+    "Se acciona de forma rápida tras identificar las necesidades de negocio",
+    "Se asignan recursos suficientes para resolver las necesidades de negocio",
+    "Se evalúan y priorizan las necesidades identificadas"
+   ]
+  },
+  {
+   "id": "Q14",
+   "elemento": "STRATEGIZE",
+   "pilar": "EVALUAR",
+   "subpilar": "Tendencias externas",
+   "pregunta": "¿Identifican constantemente las tendencias externas que representan un riesgo u oportunidad?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se identifican las tendencias externas, se opera ignorando el entorno",
+    "Se tiene un análisis de la competencia actualizado",
+    "Se tienen identificadas las tendencias de mercados similares",
+    "Se tienen identificadas las tendencias tecnológicas",
+    "Se tienen identificadas las tendencias regulatorias",
+    "Se mide el riesgo o la oportunidad de las oportunidades identificadas"
+   ]
+  },
+  {
+   "id": "Q15",
+   "elemento": "STRATEGIZE",
+   "pilar": "EVALUAR",
+   "subpilar": "Tendencias externas",
+   "pregunta": "¿Adaptan oportunamente su estrategia, una vez identificada una tendencia externa relevante ya sea para aprovechar una oportunidad o enfrentar una amenaza?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se identifican las tendencias externas",
+    "Las tendencias identificadas se analizan y priorizan según su nivel de oportunidad o amenaza",
+    "Se tiene la flexibilidad suficiente para adaptar la estrategia a las tendencias externas",
+    "La rapidez de respuesta para frente a las tendencias externas permiten evitar mayores costos de adaptación o pérdida de oportunidades",
+    "Los equipos son flexibles y pueden adaptar sus objetivos para responder adecuadamente a las tendencias externas"
+   ]
+  },
+  {
+   "id": "Q16",
+   "elemento": "STRATEGIZE",
+   "pilar": "EVALUAR",
+   "subpilar": "Motivaciones clientes",
+   "pregunta": "¿Identifican y actualizan continuamente las motivaciones, necesidades, expectativas y molestias de los clientes actuales?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se mide la percepción del cliente",
+    "Se recolecta retroalimentación de los clientes de forma constante",
+    "Se tienen perfilados a los clientes y se tienen actualizadas sus motivaciones, necesidades, expectativas y preferencias",
+    "Se usa un presupuesto aprobado para fomentar la retroalimentación de los clientes",
+    "Se mide constantemente la experiencia del cliente"
+   ]
+  },
+  {
+   "id": "Q17",
+   "elemento": "STRATEGIZE",
+   "pilar": "EVALUAR",
+   "subpilar": "Motivaciones clientes",
+   "pregunta": "¿Adaptan contínuamente la estrategia de la propuesta de valor y la experiencia del cliente: conectando, personalizando y actualizando?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se mide la percepción del cliente y la propuesta de valor no se adapta",
+    "Los canales de comunicación de la propuesta de valor se adaptan a los medios actuales",
+    "Los cambios en la propuesta de valor se hacen según los cambios en los clientes",
+    "Es más lo que la propuesta de valor se adapta al cliente que lo que el cliente se adapta a la propuesta",
+    "Se tienen proyectos de mejora de la propuesta de valor o de la experiencia del cliente constantemente"
+   ]
+  },
+  {
+   "id": "Q18",
+   "elemento": "STRATEGIZE",
+   "pilar": "EVALUAR",
+   "subpilar": "Recolección y filtrado",
+   "pregunta": "¿Existen canales para recoger ideas de proyectos dentro de la organización?",
+   "tipo": "Única",
+   "opciones": [
+    "No se recogen ideas de los colaboradores",
+    "Existe un canal de recepción de ideas",
+    "Se reciben ideas que no se les da seguimiento",
+    "Hay un responsable de la recolección de ideas que les da seguimiento",
+    "Hay un proceso accesible y estandarizado para la recepción de ideas"
+   ]
+  },
+  {
+   "id": "Q19",
+   "elemento": "STRATEGIZE",
+   "pilar": "EVALUAR",
+   "subpilar": "Recolección y filtrado",
+   "pregunta": "¿Existen canales para recoger ideas de proyectos de los clientes?",
+   "tipo": "Única",
+   "opciones": [
+    "No se recogen ideas de los clientes",
+    "Existe un canal de recepción de ideas",
+    "Se reciben ideas que no se les da seguimiento",
+    "Hay un responsable de la recolección de ideas que les da seguimiento",
+    "Hay un proceso accesible y estandarizado para la recepción de ideas"
+   ]
+  },
+  {
+   "id": "Q20",
+   "elemento": "STRATEGIZE",
+   "pilar": "EVALUAR",
+   "subpilar": "Recolección y filtrado",
+   "pregunta": "¿Existen canales para recoger ideas de proyectos de nuestros aliados externos?",
+   "tipo": "Única",
+   "opciones": [
+    "No se recogen ideas de los aliados",
+    "Existe un canal de recepción de ideas",
+    "Se reciben ideas que no se les da seguimiento",
+    "Hay un responsable de la recolección de ideas que les da seguimiento",
+    "Hay un proceso accesible y estandarizado para la recepción de ideas"
+   ]
+  },
+  {
+   "id": "Q21",
+   "elemento": "STRATEGIZE",
+   "pilar": "EVALUAR",
+   "subpilar": "Recolección y filtrado",
+   "pregunta": "¿Utilizan un proceso para filtrar las ideas recogidas?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se recogen ni se filtran las ideas",
+    "Las ideas se evalúan según los objetivos de la empresa",
+    "Las ideas se dividen según su propósito: reconfigurar, eficientizar, adaptar, integrar, rentabilizar, diferenciar, expandir, complementar, diversificar o liderar.",
+    "Las ideas se evalúan según su potencial beneficio",
+    "Las ideas se evalúan según su grado de necesidad"
+   ]
+  },
+  {
+   "id": "Q22",
+   "elemento": "STRATEGIZE",
+   "pilar": "EVALUAR",
+   "subpilar": "Recolección y filtrado",
+   "pregunta": "¿Utilizan un proceso para votar por las ideas filtradas?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se recogen ideas ni se vota por ellas",
+    "Se tienen criterios definidos para evaluar las ideas",
+    "Se tiene definido un comité para votar por las ideas",
+    "Existen proceso estandarizado para votar por las ideas"
+   ]
+  },
+  {
+   "id": "Q23",
+   "elemento": "STRATEGIZE",
+   "pilar": "INVERTIR",
+   "subpilar": "Portafolio",
+   "pregunta": "¿Equilibran su portafolio de proyectos en función de su visión y próximos destinos estratégicos?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No hay un portafolio de proyectos",
+    "Los proyectos aprobados son congruentes con la visión de la empresa",
+    "Los proyectos aprobados suman a los destinos estratégicos",
+    "Se aprueban los proyectos según una priorización de necesidades y previniendo la obsolescencia del negocio"
+   ]
+  },
+  {
+   "id": "Q24",
+   "elemento": "STRATEGIZE",
+   "pilar": "INVERTIR",
+   "subpilar": "Portafolio",
+   "pregunta": "¿Equilibran su portafolio de proyectos en función de las necesidades de mejora y las oportunidades para explorar?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No hay un portafolio de proyectos",
+    "Se diferencian los proyectos de mejora y los de exploración",
+    "Se pueden correr proyectos sin descuidar la operación",
+    "Los proyectos de mejora buscan: reconfigurar, eficientizar, adaptar, integrar o rentabilizar",
+    "Los proyectos de exploración buscan: diferenciar, expandir, complementar, diversificar o liderar.",
+    "El portafolio está balanceado en cantidad de proyectos de mejora y de exploración basado en las necesidades actuales"
+   ]
+  },
+  {
+   "id": "Q25",
+   "elemento": "STRATEGIZE",
+   "pilar": "INVERTIR",
+   "subpilar": "Portafolio",
+   "pregunta": "¿Promueven y apadrinan los proyectos de su portafolio por medio del involucramiento de mandos altos como \"sponsors\"?",
+   "tipo": "Única",
+   "opciones": [
+    "No hay sponsors ni se promueven los proyectos",
+    "Se comprende la figura del sponsor",
+    "El proyecto cuenta con el apoyo de un mando alto como sponsor",
+    "El sponsor facilita medios para el avance del proyecto",
+    "El sponsor se facilita los medios y se actualiza constantemente del progreso del proyecto",
+    "El sponsor retroalimenta al equipo del proyecto, además de actualizarse y facilitar medios de avance"
+   ]
+  },
+  {
+   "id": "Q26",
+   "elemento": "STRATEGIZE",
+   "pilar": "INVERTIR",
+   "subpilar": "Presupuesto",
+   "pregunta": "¿Definen criterios de inversión de rentabilidad mínima y capital de inversión máximo para los proyectos?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No hay criterios de inversión para los proyectos",
+    "Hay indicadores financieros en los proyectos",
+    "Los indicadores están asociados al tipo de proyecto",
+    "Está definido el beneficio buscado y se compara con los indicadores financieros",
+    "Se tiene definida la rentabilidad mínima esperada desde el inicio de los proyectos",
+    "Se tiene definida la inversión máxima desde el inicio de los proyectos"
+   ]
+  },
+  {
+   "id": "Q27",
+   "elemento": "STRATEGIZE",
+   "pilar": "INVERTIR",
+   "subpilar": "Presupuesto",
+   "pregunta": "¿Asignan un presupuesto según las diferentes etapas de los proyectos?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se define un presupuesto para los proyectos",
+    "Se tiene definida la inversión máxima desde el inicio de los proyectos",
+    "Los proyectos tienen indicadores a cumplir para el aumento de presupuesto",
+    "El presupuesto está dividido por las etapas del proyecto"
+   ]
+  },
+  {
+   "id": "Q28",
+   "elemento": "STRATEGIZE",
+   "pilar": "INVERTIR",
+   "subpilar": "Presupuesto",
+   "pregunta": "¿Tienen un proceso ágil para la aprobación de presupuesto de implementación para los proyectos?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se tiene definido un presupuesto para los proyectos",
+    "Se tiene un sistema de firma digital",
+    "Se tiene un presupuesto preaprobado (caja chica)",
+    "La confianza en los equipos permite una aprobación ágil de presupuesto",
+    "Se tiene un proceso definido para la aprobación de presupuestos"
+   ]
+  },
+  {
+   "id": "Q29",
+   "elemento": "STRATEGIZE",
+   "pilar": "INVERTIR",
+   "subpilar": "Alianzas",
+   "pregunta": "¿Se alían con instituciones, comunidades de emprendedores y/o plataformas de crowdfounding para encontrar oportunidades de negocios para invertir?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se toman en cuenta plataformas externas para buscar oportunidades de inversión",
+    "Se conocen plataformas y/o comunidades",
+    "Se consultan plataformas y/o comunidades",
+    "Se invierte en proyectos plataformas y/o comunidades",
+    "Existe un responsable que busca activamente oportunidades de inversión en estos medios"
+   ]
+  },
+  {
+   "id": "Q30",
+   "elemento": "STRATEGIZE",
+   "pilar": "INVERTIR",
+   "subpilar": "Alianzas",
+   "pregunta": "¿Se Involucran en eventos del séctor y de la industria, para ampliar su networking con alianzas?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se busca ampliar el networking",
+    "Se conocen los eventos del sector y la industria",
+    "Se asiste a los eventos del sector y de la industria",
+    "Se involucran activamente en los eventos como expositor",
+    "Se forman nuevas alianzas"
+   ]
+  },
+  {
+   "id": "Q31",
+   "elemento": "STRATEGIZE",
+   "pilar": "INVERTIR",
+   "subpilar": "Alianzas",
+   "pregunta": "¿Desarrollan alianzas para invertir capital en conjunto en oportunidades de negocios?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se buscan alianzas para invertir en conjunto",
+    "La empresa tiene la apertura y flexibilidad de hacer alianzas, fusiones o adquisiciones",
+    "Se hacen análisis de las oportunidades potenciales con otras empresas",
+    "Se tiene claras las carencias de la empresa que pueden ser resueltas con alianzas",
+    "Se realizan inversiones con otras empresas sumando capital y conocimientos en conjunto"
+   ]
+  },
+  {
+   "id": "Q32",
+   "elemento": "MANAGE",
+   "pilar": "GESTIÓN",
+   "subpilar": "Entrada",
+   "pregunta": "¿Utilizan un proceso para la captura y análisis de requerimientos y objetivos previo al inicio de cada proyecto?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No hay definiciones iniciales previo al inicio de los proyectos",
+    "Objetivo general del proyecto",
+    "Entregables definidos",
+    "Limitantes definidas",
+    "Razones y detonante del proyecto",
+    "Acta constitutiva de proyecto oficial"
+   ]
+  },
+  {
+   "id": "Q33",
+   "elemento": "MANAGE",
+   "pilar": "GESTIÓN",
+   "subpilar": "Entrada",
+   "pregunta": "¿Validan y priorizan los objetivos iniciales con los stakeholders para cada proyecto?",
+   "tipo": "Única",
+   "opciones": [
+    "Inician los proyectos sin el conocimiento de los stakeholders",
+    "Inician los proyectos sin el punto de vista de los stakeholders",
+    "El objetivo está dado por un stakeholder, sin expectativas claras",
+    "Las expectativas de los stakeholders están dadas, pero no priorizadas",
+    "El objetivo y los requerimientos están alineados entre los stakeholders",
+    "Los stakeholders están involucrados desde el inicio del proyecto, sus expectativas son claras y están alineadas"
+   ]
+  },
+  {
+   "id": "Q34",
+   "elemento": "MANAGE",
+   "pilar": "GESTIÓN",
+   "subpilar": "Progreso",
+   "pregunta": "¿Realizan reuniones recurrentes de seguimiento cada semana para revisar el avance de los proyectos?",
+   "tipo": "Única",
+   "opciones": [
+    "No hay reuniones de seguimiento de los proyectos",
+    "El seguimiento a proyecto se da de forma individual y no en equipo",
+    "Las reuniones están agendadas pero no todos asisten",
+    "Las reuniones agendadas se dan y se avanza progresivamente en ellas"
+   ]
+  },
+  {
+   "id": "Q35",
+   "elemento": "MANAGE",
+   "pilar": "GESTIÓN",
+   "subpilar": "Progreso",
+   "pregunta": "¿Utilizan herramientas digitales para facilitar a los involucrados la captura del progreso del proyecto?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No hay herramientas de apoyo",
+    "Existen herramientas",
+    "Las herramientas se usan para capturar hitos y desglosar el trabajo",
+    "Con las herramientas gestionan y delegan actividades",
+    "Con las herramientas se captura el estatus y el progreso del proyecto",
+    "Se usan las herramientas complementándose unas a las otras"
+   ]
+  },
+  {
+   "id": "Q36",
+   "elemento": "MANAGE",
+   "pilar": "GESTIÓN",
+   "subpilar": "Progreso",
+   "pregunta": "¿Es suficiente el tiempo dedicado al proyecto de cada persona mientras siguen cumpliendo sus responsabilidades?",
+   "tipo": "Única",
+   "opciones": [
+    "No se miden los esfuerzos de los equipos en los proyectos",
+    "Los integrantes son inconsistentes en el avance del proyecto",
+    "La operación diaria no es lo suficientemente flexible para ejecutar un proyecto adicional",
+    "Se cumple con las responsabilidades operativas, pero no siempre cumplen con los avances del proyecto en tiempo",
+    "Se cumplen con los avances y con las responsabilidades operativas pero usando tiempo adicional al de la jornada",
+    "Los integrantes cumplen operativamente y con el avance del proyecto sin interferencia de una en otras"
+   ]
+  },
+  {
+   "id": "Q37",
+   "elemento": "MANAGE",
+   "pilar": "GESTIÓN",
+   "subpilar": "Reporteo",
+   "pregunta": "¿Generan informes mensuales que detallan el estado de los proyectos, hitos alcanzados y acciones clave realizadas?",
+   "tipo": "Única",
+   "opciones": [
+    "No se reportan avances",
+    "Los reportes se hacen desordenadamente",
+    "Los reportes hechos tienen detalles excesivos, sin enfocarse en el valor",
+    "Los reportes tienen un resumen de resultados clave",
+    "Hay un formato estándar para generar informes",
+    "Dentro del formato se incluye una ruta crítica y siguientes pasos claros"
+   ]
+  },
+  {
+   "id": "Q38",
+   "elemento": "MANAGE",
+   "pilar": "GESTIÓN",
+   "subpilar": "Reporteo",
+   "pregunta": "¿Realizan una reunión mensual con los stakeholders para compartir el avance y decidir sobre el proyecto?",
+   "tipo": "Única",
+   "opciones": [
+    "No hay reuniones de reporteo",
+    "Se reportan los avances del proyecto de forma asíncrona sin periodicidad",
+    "Hay una periodicidad para reportar avances, pero las decisiones incurren en retrabajos o pivoteos tardíos",
+    "La sesión se da periódicamente y se toman decisiones efectivas",
+    "Los stakeholders retroalimentan al equipo, dan feedback y medios para un mejor avance del proyecto"
+   ]
+  },
+  {
+   "id": "Q39",
+   "elemento": "MANAGE",
+   "pilar": "GESTIÓN",
+   "subpilar": "Salida",
+   "pregunta": "¿Concluyen al final de cada proyecto logros, áreas de mejora y aprendizajes para cerrar el proyecto?",
+   "tipo": "Única",
+   "opciones": [
+    "El proyecto termina sin un cierre",
+    "Se cierra el proyecto con criterios poco claros",
+    "Se cierran los proyectos mencionando los indicadores clave",
+    "Se cierran los proyectos mencionando los indicadores clave, logros y aprendizajes para la organización",
+    "Se cierran los proyectos mencionando los indicadores clave, aprendizajes, logros y áreas de mejora"
+   ]
+  },
+  {
+   "id": "Q40",
+   "elemento": "MANAGE",
+   "pilar": "GESTIÓN",
+   "subpilar": "Salida",
+   "pregunta": "¿Almacenan los aprendizajes clave de los proyectos para que puedan ser consultados y/o retomados en un futuro?",
+   "tipo": "Única",
+   "opciones": [
+    "Los proyectos terminan sin un cierre",
+    "Si es que se deben consultar los aprendizajes, se deben deducir del avance capturado",
+    "Conocer los aprendizajes depende de contactar a una persona que estuvo en el proyecto",
+    "Se encuentran los aprendizajes en desorden",
+    "Los aprendizajes se encuentran resumidos según las etapas del proyecto"
+   ]
+  },
+  {
+   "id": "Q41",
+   "elemento": "MANAGE",
+   "pilar": "GESTIÓN",
+   "subpilar": "Salida",
+   "pregunta": "¿Implementan agilmente los proyectos que se van graduando y/o transfieren la propiedad del proyecto al equipo que lo operará?",
+   "tipo": "Única",
+   "opciones": [
+    "Los proyectos terminan sin un cierre y no se implementa",
+    "Los proyectos se transfieren sin roles ni expectativas claras y finalmente se pierde",
+    "El proyecto se implementa lentamente sin seguimiento ni indicadores",
+    "El proyecto se transfiere al equipo adecuado para ser implementado, pero sin capacidades (tiempo, apoyo o recursos) para hacerlo eficientemente",
+    "Se transfiere el proyecto con los recursos y apoyo necesarios, se  implementa con un seguimiento basado en indicadores"
+   ]
+  },
+  {
+   "id": "Q42",
+   "elemento": "MANAGE",
+   "pilar": "GESTIÓN",
+   "subpilar": "Salida",
+   "pregunta": "¿Reconocen y recompensan el esfuerzo de quienes participan en los proyectos?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se reconoce ni recompensa a los participantes",
+    "Se les reconoce abiertamente en la organización",
+    "Se les recompensa",
+    "Existe un esquema para las recompensas según el desempeño",
+    "Las recompensas son valoradas por los participantes"
+   ]
+  },
+  {
+   "id": "Q43",
+   "elemento": "MANAGE",
+   "pilar": "GESTIÓN",
+   "subpilar": "Project Management",
+   "pregunta": "¿Utilizan roles con responsabilidades claras dentro del marco de gestión de proyectos para asegurar una ejecución eficiente?",
+   "tipo": "Única",
+   "opciones": [
+    "No hay roles definidos",
+    "Los roles se definen empíricamente a lo largo de la ejecución de los proyectos",
+    "Existen roles definidos pero en la ejecución se mezclan las responsabilidades",
+    "Los roles están estandarizados, se comunican y ejecutan con un involucramiento adecuado"
+   ]
+  },
+  {
+   "id": "Q44",
+   "elemento": "MANAGE",
+   "pilar": "GESTIÓN",
+   "subpilar": "Project Management",
+   "pregunta": "¿Utilizan herramientas de gestión digitales como software de gestión, tableros kanban y pizarrones virtuales para facilitar la colaboración y el seguimiento?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No hay herramientas de colaboración ni seguimiento",
+    "Existen herramientas de colaboración y seguimiento",
+    "Se capacita en el uso de las herramientas",
+    "Las herramientas son usadas frecuentemente",
+    "Las herramientas se complementan entre ellas"
+   ]
+  },
+  {
+   "id": "Q45",
+   "elemento": "MANAGE",
+   "pilar": "GESTIÓN",
+   "subpilar": "Project Management",
+   "pregunta": "¿Utilizan una metodología o conjunto de métodos, sobre los cuales progresan los proyectos por etapas?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "Hay una metodología",
+    "La metodología permite gestionar el avance",
+    "La metodología tiene etapas según el avance del proyecto",
+    "La metodología se adapta al tipo de proyecto",
+    "La metodología tiene herramientas tangibles para el avance de los proyectos"
+   ]
+  },
+  {
+   "id": "Q46",
+   "elemento": "MANAGE",
+   "pilar": "GESTIÓN",
+   "subpilar": "Project Management",
+   "pregunta": "¿Utilizan guías estándar para orientar la ejecución de los proyectos dentro de las etapas?",
+   "tipo": "Única",
+   "opciones": [
+    "No hay guías para orientar la ejecución",
+    "Se corren los proyectos empíricamente",
+    "Se cuenta con una ruta general que es difícil de adaptar a cada proyecto",
+    "Hay guías por etapas de los proyectos",
+    "La guía cuenta con criterios claros por cada etapa"
+   ]
+  },
+  {
+   "id": "Q47",
+   "elemento": "MANAGE",
+   "pilar": "GESTIÓN",
+   "subpilar": "Project Management",
+   "pregunta": "¿Promueven activamente el uso de herramientas y guías estándar entre los equipos de proyecto para garantizar la consistencia y eficacia en la gestión y ejecución?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No hay herramientas ni guías",
+    "Se usan herramientas para gestionar el progreso de los proyectos",
+    "Se usan herramientas para explorar y avanzar sobre el proyecto",
+    "Las herramientas se basan en una metodología",
+    "Existen manuales o personas de consulta para el uso correcto de las herramientas"
+   ]
+  },
+  {
+   "id": "Q48",
+   "elemento": "MANAGE",
+   "pilar": "GESTIÓN",
+   "subpilar": "Metricas",
+   "pregunta": "¿Utilizan métricas de avance para ubicar a los proyectos en función de los aprendizajes y/o los entregables esperados por etapa?",
+   "tipo": "Única",
+   "opciones": [
+    "Se desconocen las métricas y entregables por etapa de los proyectos",
+    "Los proyectos están separados por etapas según el tipo de proyecto",
+    "Se tienen definidas métricas para cada una de las etapas",
+    "Se definen métricas, entregables y aprendizajes (evidencia necesaria) para cada una de las etapas"
+   ]
+  },
+  {
+   "id": "Q49",
+   "elemento": "MANAGE",
+   "pilar": "GESTIÓN",
+   "subpilar": "Metricas",
+   "pregunta": "¿Utilizan métricas de evidencia para validar las hipótesis y tomar decisiones oportunas para continuar, iterar o detener el proyecto?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se tiene forma de medir la validación de las hipótesis",
+    "Se conocen los criterios para continuar, iterar o detener un proyecto",
+    "Se conoce la diferencia entre información y evidencia",
+    "Se usa evidencia para tomar decisiones",
+    "Es claro el nivel de evidencia para tomar cada una de las decisiones"
+   ]
+  },
+  {
+   "id": "Q50",
+   "elemento": "MANAGE",
+   "pilar": "DISEÑO",
+   "subpilar": "Investigación",
+   "pregunta": "¿Utilizan métodos, técnicas y herramientas como Design Thinking o Jobs To Be Done para llevar a cabo investigaciones?",
+   "tipo": "Única",
+   "opciones": [
+    "No hay herramientas ni recursos teóricos usados para realizar investigaciones",
+    "Las investigaciones se realizan de forma empírica",
+    "Se usa el método científico para hacer investigaciones (Observación, hipótesis, experimento, análisis)",
+    "Se conocen distintos marcos teóricos (Design Thinking, Jobs to be done, etc) y se aplican según el tipo de investigación",
+    "Se tiene dominio sobre las técnicas de investigación además de aplicar las técnicas con las herramientas adecuadas"
+   ]
+  },
+  {
+   "id": "Q51",
+   "elemento": "MANAGE",
+   "pilar": "DISEÑO",
+   "subpilar": "Investigación",
+   "pregunta": "¿Transforman señales (observaciones basadas en la realidad) a insights (hallazgos profundos no obvios)?",
+   "tipo": "Única",
+   "opciones": [
+    "Solamente se obtiene y almacena la información",
+    "La información obtenida se ordena y caracteriza",
+    "Se analiza la información obtenida y se interrelaciona",
+    "Se realizan conclusiones basadas en la evidencia e información analizada"
+   ]
+  },
+  {
+   "id": "Q52",
+   "elemento": "MANAGE",
+   "pilar": "DISEÑO",
+   "subpilar": "Hipótesis",
+   "pregunta": "¿Definen y priorizan para cada proyecto las hipótesis críticas que deben validar y evitar el sesgo de ejecución o build trap?",
+   "tipo": "Única",
+   "opciones": [
+    "Una actividad lleva a la otra mecánicamente, sin una hipótesis a probar",
+    "Los proyectos usan supuestos como base para avanzar",
+    "Se generan hipótesis para probar los supuestos",
+    "Las hipótesis generadas están priorizadas y se prueban teóricamente",
+    "Las hipótesis priorizadas se validan con evidencia resultada de experimentos"
+   ]
+  },
+  {
+   "id": "Q53",
+   "elemento": "MANAGE",
+   "pilar": "DISEÑO",
+   "subpilar": "Hipótesis",
+   "pregunta": "¿Formulan hipótesis verificables, precisas y específicas sobre los supuestos a validar?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "El avance del proyecto se basa en supuestos para avanzar",
+    "El avance del proyecto se basa en hipótesis",
+    "Las hipótesis se pueden verificar",
+    "Las hipótesis buscan demostrar una cosa a la vez (específica)",
+    "Es claro el resultado para que la hipótesis sea validada (precisa)"
+   ]
+  },
+  {
+   "id": "Q54",
+   "elemento": "MANAGE",
+   "pilar": "DISEÑO",
+   "subpilar": "Prototipo",
+   "pregunta": "¿Utilizan el prototipado como una herramienta para iterar y mejorar las soluciones antes de su implementación final?",
+   "tipo": "Única",
+   "opciones": [
+    "No se prototipa",
+    "Se gasta mucho tiempo y esfuerzo en prototipos robustos",
+    "Se comprende el concepto de MVP (Producto mínimo viable)",
+    "Se tiene una metodología para crear y validar prototipos",
+    "Se validan conceptos de solución antes de validar una solución completa",
+    "Se comprende la validación obtenida del prototipado y se mejora tras cada iteración"
+   ]
+  },
+  {
+   "id": "Q55",
+   "elemento": "MANAGE",
+   "pilar": "DISEÑO",
+   "subpilar": "Prototipo",
+   "pregunta": "¿Prototipan rápido y barato, mediante un proceso y gestión ágiles?",
+   "tipo": "Única",
+   "opciones": [
+    "No se prototipa",
+    "Se gasta mucho tiempo y esfuerzo en prototipos robustos",
+    "Los prototipos se construyen pero procesos internos impiden validarlo rápido",
+    "Se usan los prototipos como medio de validación de componentes de la solución",
+    "Hay un proceso estándar para la creación y gestión de prototipos de forma ágil"
+   ]
+  },
+  {
+   "id": "Q56",
+   "elemento": "MANAGE",
+   "pilar": "DISEÑO",
+   "subpilar": "Disrupción",
+   "pregunta": "¿Diseñan soluciones y modelos de negocios disruptivos, pensando fuera de la caja e inspirandose de referentes en otras industrias?",
+   "tipo": "Única",
+   "opciones": [
+    "No se usa el modelo de negocio",
+    "Se diseña solamente la solución, ignorando el modelo",
+    "Se diseña el valor y se contemplan algunos elementos para que sea construido",
+    "Se diseñan soluciones junto con su modelo de negocio",
+    "Se diseña la solución y el modelo de negocio según un patrón que relaciona a los bloques del modelo",
+    "La inspiración de otras industrias permite generar soluciones y modelos disruptivos"
+   ]
+  },
+  {
+   "id": "Q57",
+   "elemento": "MANAGE",
+   "pilar": "DISEÑO",
+   "subpilar": "Disrupción",
+   "pregunta": "¿Utilizan sesiones de ideación y casos de estudio para generar ideas disruptivas?",
+   "tipo": "Única",
+   "opciones": [
+    "No se generan ideas para proyectos",
+    "De vez en cuando hay sesiones de retroalimentación con los colaboradores",
+    "Se fomenta la recepción de ideas de mejora de los colaboradores",
+    "Se generan dinámicas para la recepción de ideas de los colaboradores",
+    "Se hacen dinámicas para desarrollar en conjunto ideas con los colaboradores usando de ejemplo casos de negocio",
+    "Las ideas se desarrollan con una metodología, se promueven y existen los canales para ser recolectadas constantemente"
+   ]
+  },
+  {
+   "id": "Q58",
+   "elemento": "MANAGE",
+   "pilar": "DISEÑO",
+   "subpilar": "Pivoteo",
+   "pregunta": "¿Accionan cambios de enfoque de proyecto, \"pivoteos\", con autonomía y liderazgo?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "Los proyectos no permiten cambios",
+    "Son claros los criterios para realizar un pivoteo en un proyecto",
+    "Los equipos comparten información sintetizada para tomar decisiones sobre el proyecto",
+    "Los stakeholders deciden sobre el proyecto según la evidencia presentada",
+    "Los equipos sugieren el rumbo del proyecto"
+   ]
+  },
+  {
+   "id": "Q59",
+   "elemento": "MANAGE",
+   "pilar": "DISEÑO",
+   "subpilar": "Pivoteo",
+   "pregunta": "¿Definen el rumbo de los proyectos con la evidencia disponible, sin buscar ser expertos en el tema?",
+   "tipo": "Única",
+   "opciones": [
+    "No se obtiene evidencia",
+    "Se toman decisiones con base a información general",
+    "Lleva mucho tiempo recolectar evidencia y al final se padece de parálisis por análisis al tomar decisiones",
+    "Constantemente se necesita de una prueba que re-valide la evidencia recolectada para la toma de decisiones",
+    "El diseño de los experimentos permite recolectar la evidencia necesaria para la toma de decisiones"
+   ]
+  },
+  {
+   "id": "Q60",
+   "elemento": "MANAGE",
+   "pilar": "TESTEO",
+   "subpilar": "Estudio de usuario",
+   "pregunta": "¿Realizan estudios cualitativos para comprender lo que los distintos actores valoran antes de crear o mejorar soluciones?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "Se crean \"soluciones\" sin antes validar con los actores",
+    "Se usan técnicas de observación con los actores",
+    "Se usan técnicas de entrevistas con los actores",
+    "Se usan focus groups o pequeñas muestras de personas para validar con ellos",
+    "Se usan prototipos para validar con actores",
+    "El desarrollo de soluciones se hace a la par que las validaciones con los actores"
+   ]
+  },
+  {
+   "id": "Q61",
+   "elemento": "MANAGE",
+   "pilar": "TESTEO",
+   "subpilar": "Estudio de usuario",
+   "pregunta": "¿Perfilan a los distintos actores, generando arquetipos que representan un grupo de actores con características y motivaciones similares?",
+   "tipo": "Única",
+   "opciones": [
+    "No se consideran a los actores / usuarios al desarrollar \"soluciones\"",
+    "Se perfila a los actores de forma hipotética",
+    "Se validan los actores por medio de entrevistas (evidencia hablada)",
+    "Se validan los actores por medio de evidencias de acción",
+    "Se evoluciona de \"actor\" a \"arquetipo\", se entienden las motivaciones de los arquetipos y sus retos",
+    "Se usan arquetipos específicos agrupados según sus características y motivaciones teniendo claras sus necesidades a resolver"
+   ]
+  },
+  {
+   "id": "Q62",
+   "elemento": "MANAGE",
+   "pilar": "TESTEO",
+   "subpilar": "Estudio de mercado",
+   "pregunta": "¿Realizan estudios de mercado para validar la deseabilidad del mercado por el modelo de negocio?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se considera al mercado al desarrollar \"soluciones\"",
+    "Se usan medios digitales (como redes sociales y ads) o tradicionales (como encuestas) para hacer los estudios según convenga",
+    "Se generan prototipos (como brochures, preventas o landing pages) para validar el mercado",
+    "Se mapean los posibles competidores, sus ventajas, desventajas y precios",
+    "Se tiene clara el mercado y su escala al que van dirigidos los estudios (según la hipótesis a validar)"
+   ]
+  },
+  {
+   "id": "Q63",
+   "elemento": "MANAGE",
+   "pilar": "TESTEO",
+   "subpilar": "Estudio de mercado",
+   "pregunta": "¿Realizan pruebas piloto para validar el modelo de negocio en un mercado controlado?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se considera al mercado al desarrollar \"soluciones\"",
+    "Las pruebas piloto realizadas validan la factibilidad construyendo la solución a escala",
+    "Las pruebas piloto buscan validar la viabilidad probando la forma de monetización",
+    "Las pruebas piloto se monitorean recabando información suficiente (antes, durante y después de la prueba) para validar el modelo",
+    "Se analiza la información obtenida para obtener aprendizajes y conclusiones"
+   ]
+  },
+  {
+   "id": "Q64",
+   "elemento": "MANAGE",
+   "pilar": "TESTEO",
+   "subpilar": "Estudio técnico",
+   "pregunta": "¿Realizan modelos financieros para validar la viabilidad del modelo de negocio?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se proyectan costos ni beneficios",
+    "Se usa evidencia de la forma de monetización de la solución para generar los modelos financieros",
+    "Se contemplan escenarios dentro del modelo financiero",
+    "La evidencia de costos se basa en estudios de factibilidad",
+    "La evidencia de beneficios se basa en los estudios del mercado"
+   ]
+  },
+  {
+   "id": "Q65",
+   "elemento": "MANAGE",
+   "pilar": "TESTEO",
+   "subpilar": "Estudio técnico",
+   "pregunta": "¿Realizan estudios de factibilidad con expertos técnicos para validar el modelo de negocio?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se valida si es posible crear el valor del modelo",
+    "Se conocen las actividades y procesos necesarios para crear la solución además de poderlas realizar",
+    "Se conocen y se tienen (o se pueden obtener) los recursos necesarios para crear la solución",
+    "Se conoce a los aliados necesarios para crear la solución y se tiene (o puede tener) un trato con ellos",
+    "Se tienen medidos los elementos necesarios para crear la solución y su impacto en la estructura de costos"
+   ]
+  },
+  {
+   "id": "Q66",
+   "elemento": "MANAGE",
+   "pilar": "TESTEO",
+   "subpilar": "Experimentación",
+   "pregunta": "¿Utilizan métodos, técnicas y herramientas como Lean Startup, para experimentar?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se hace experimentación o testeo",
+    "Se tiene el método científico como base para la experimentación",
+    "La experimentación se basa en ciclos de: 1. Construir 2. Medir 3. Mejorar",
+    "Se hace uso adecuado de las técnicas y herramientas para experimentar según la validación necesaria teniendo una biblioteca de experimentos a la mano"
+   ]
+  },
+  {
+   "id": "Q67",
+   "elemento": "MANAGE",
+   "pilar": "TESTEO",
+   "subpilar": "Experimentación",
+   "pregunta": "¿Experimentan rápido y barato, mediante presupuesto preaprobado?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se hace experimentación o testeo",
+    "La experimentación se basa en las hipótesis bien definidas (verificables, precisas y discretas)",
+    "Se tiene un enfoque ágil en la gestión del prototipado",
+    "Se tiene claridad en el grado de evidencia necesaria para validar hipótesis mediante experimentos",
+    "Las aprobaciones internas son rápidas (presupuesto, uso de recursos, etc)"
+   ]
+  },
+  {
+   "id": "Q68",
+   "elemento": "MANAGE",
+   "pilar": "TESTEO",
+   "subpilar": "Validación",
+   "pregunta": "¿Validan con comunidades de usuarios perfilados que activamente proporcionan feedback por medio de focus groups, entrevistas, encuestas?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se consideran a los actores / usuarios al desarrollar \"soluciones\"",
+    "El contacto de las personas con quienes se testea se almacena",
+    "La ejecución del testeo permite apertura a siguientes validaciones con los actores",
+    "Se cuentan con canales activos para la recolección de feedback de los actores",
+    "Se fomenta la validación de soluciones con los actores antes de la construcción de las mismas"
+   ]
+  },
+  {
+   "id": "Q69",
+   "elemento": "MANAGE",
+   "pilar": "TESTEO",
+   "subpilar": "Validación",
+   "pregunta": "¿Utilizan aliados y/o plataformas externas de usuarios perfilados que activamente proporcionan feedback por medio de focus groups, entrevistas, encuestas?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se obtiene feedback de fuentes externas",
+    "La empresa reconoce cuando carecen de capacidades para el testeo y buscan apoyo externo",
+    "La empresa cuenta con un directorio de aliados a los cuales recurrir según el tipo de feedback requerido",
+    "Se fomenta el uso de distintos medios para la recolección de feedback de cualquier tipo"
+   ]
+  },
+  {
+   "id": "Q70",
+   "elemento": "FEED",
+   "pilar": "DESARROLLAR",
+   "subpilar": "Mapa",
+   "pregunta": "¿Definen y evalúan las competencias por unidad de negocio, para contar con un mapa de la cultura organizacional?",
+   "tipo": "Única",
+   "opciones": [
+    "No existen documentos, registros ni herramientas de evaluación disponibles",
+    "Hay documentos básicos sin métricas claras; no se actualizan regularmente",
+    "Hay informes actualizados de competencias, con análisis de rendimiento por unidad",
+    "Hay mapas de competencias detallados y actualizados, con comparaciones anuales y acciones de mejora",
+    "Hay un mapa de competencias integral, utilizado para tomar decisiones estratégicas, completamente integrado en los sistemas de RRHH"
+   ]
+  },
+  {
+   "id": "Q71",
+   "elemento": "FEED",
+   "pilar": "DESARROLLAR",
+   "subpilar": "Mapa",
+   "pregunta": "¿Definieron las formas de trabajo oficiales, como consecuencia de los aprendizajes históricos?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No existen formas de trabajo definidas formalmente",
+    "Existen formas de trabajo para alinearnos",
+    "Existen formas de trabajo para planear",
+    "Existen formas de trabajo para evaluar",
+    "Las formas de trabajo son oficiales y se evolucionan con los aprendizajes del tiempo"
+   ]
+  },
+  {
+   "id": "Q72",
+   "elemento": "FEED",
+   "pilar": "DESARROLLAR",
+   "subpilar": "Mapa",
+   "pregunta": "¿Utilizan dinámicas como entrenamientos o sesiones de equipo para fomentar las la cultura y las formas de trabajo deseadas?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No hay registro de eventos o sesiones de equipo realizadas para este fin",
+    "Existe una agenda de eventos y sesiones",
+    "Se da seguimiento y analizan el resultado e impacto de las dinámicas",
+    "Integran y adaptan las dinámicas a cada área de trabajo",
+    "Existe involucramiento de los colaboradores de todos los niveles"
+   ]
+  },
+  {
+   "id": "Q73",
+   "elemento": "FEED",
+   "pilar": "DESARROLLAR",
+   "subpilar": "Balance",
+   "pregunta": "¿Evalúan con métricas la carga de trabajo de forma grupal e individual?",
+   "tipo": "Única",
+   "opciones": [
+    "Sin herramientas, métricas ni informes disponibles",
+    "Hay evaluaciones esporádicas y sin herramientas formales",
+    "Hay métricas sobre horas trabajadas y tareas asignadas en algunos casos",
+    "Se usa un software de gestión de proyectos para rastrear carga de trabajo y productividad por objetivos"
+   ]
+  },
+  {
+   "id": "Q74",
+   "elemento": "FEED",
+   "pilar": "DESARROLLAR",
+   "subpilar": "Balance",
+   "pregunta": "¿Evalúan con métricas el nivel de desarrollo de forma grupal e individual?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No hay métricas ni herramientas para medir el desarrollo",
+    "Se tiene un esquema para evaluar el nivel de desarrollo",
+    "Se tienen herramientas para medir el desarrollo grupal e individual",
+    "Utilizan métricas cuantitativas y cualitativas",
+    "Existe un plan de desarrollo profesional comunicado a colaboradores"
+   ]
+  },
+  {
+   "id": "Q75",
+   "elemento": "FEED",
+   "pilar": "DESARROLLAR",
+   "subpilar": "Balance",
+   "pregunta": "¿Depuran el ambiente de trabajo continuamente por unidad de negocio, para cuidar la cultura organizacional?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se realiza seguimiento de la cultura organizacional",
+    "Existen encuestas periódicas sobre la satisfacción y bienestar de los colaboradores",
+    "Se implementan planes de acción para abordar los problemas identificados",
+    "Se usan de indicadores clave para medir el ambiente de trabajo, como tasas de rotación, ausentismo, y niveles de estrés",
+    "Existe comunicación abierta y transparente de los resultados y las acciones a todos los niveles de la organización",
+    "Hay compromiso y participación de la alta dirección en la promoción y mantenimiento de un buen ambiente de trabajo"
+   ]
+  },
+  {
+   "id": "Q76",
+   "elemento": "FEED",
+   "pilar": "DESARROLLAR",
+   "subpilar": "Desarrollo",
+   "pregunta": "¿Utilizan plataformas de aprendizaje para el desarrollo individual?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se utilizan plataformas de aprendizaje",
+    "Hay plataformas de aprendizaje y formación",
+    "Hay plataformas de aprendizaje para la especialización por roles específicos",
+    "Se tiene un sistema de formación continuo con evaluaciones y mejoras basadas en resultados",
+    "Hay plataformas de aprendizaje para desarrollo de habilidades básicas"
+   ]
+  },
+  {
+   "id": "Q77",
+   "elemento": "FEED",
+   "pilar": "DESARROLLAR",
+   "subpilar": "Desarrollo",
+   "pregunta": "¿Organizan conferencias de inspiración para la organización?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No hacen eventos para inspirar",
+    "Los colaboradores tienen acceso a conferencias y se fomenta la participación",
+    "Hay conferencias organizadas y programadas dirigidas para reforzar la visión y objetivos de la organización",
+    "Se hace el seguimiento del impacto de las conferencias y hay retroalimentación continua",
+    "Hay participación activa en todos los niveles de la organización"
+   ]
+  },
+  {
+   "id": "Q78",
+   "elemento": "FEED",
+   "pilar": "DESARROLLAR",
+   "subpilar": "Desarrollo",
+   "pregunta": "¿Organizan talleres de formación para la organización?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se organizan talleres",
+    "Hay talleres de formación programados",
+    "Se hace el seguimiento y evaluación del impacto en el desarrollo de los colaboradores",
+    "Los talleres están alineados con la estrategia organizacional"
+   ]
+  },
+  {
+   "id": "Q79",
+   "elemento": "FEED",
+   "pilar": "DESARROLLAR",
+   "subpilar": "Innovación",
+   "pregunta": "¿Promueven la creatividad, las divergencia y el pensamiento lateral para resolver problemas o aprovechar oportunidades?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se promueve la creatividad",
+    "Hay incentivos para quienes tienen propuestas creativas",
+    "Realizan sesiones de ideación; para la resolución de retos dentro de las áreas",
+    "Existen promotores que fomenten la creatividad",
+    "Los líderes en la organización propician la creatividad"
+   ]
+  },
+  {
+   "id": "Q80",
+   "elemento": "FEED",
+   "pilar": "DESARROLLAR",
+   "subpilar": "Innovación",
+   "pregunta": "¿Promueven la iteración, los aprendizajes y construyen para aprender mediante prototipos simples sin buscar la perfección?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se promueve la iteración ni uso de prototipos",
+    "Hay incentivos para quienes tienen propuestas de iteración y construcción de prototipos",
+    "Se tienen conocimientos y herramientas para construir prototipos conceptuales, visuales y funcionales",
+    "Existen promotores que fomenten la iteración y el prototipado",
+    "Los líderes en la organización propician la iteración y valoran los aprendizajes"
+   ]
+  },
+  {
+   "id": "Q81",
+   "elemento": "FEED",
+   "pilar": "DESARROLLAR",
+   "subpilar": "Innovación",
+   "pregunta": "¿Promueven el desafio al status quo, la mejora continua  para promover una cultura de liderazgo y proactividad?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se promueve la mejora continua",
+    "Hay incentivos para quienes tienen propuestas de mejora",
+    "Realizan sesiones para buscar una mejora continua dentro de las áreas",
+    "Existen promotores que fomenten la mejora continua",
+    "Los líderes en la organización propician la mejora continua"
+   ]
+  },
+  {
+   "id": "Q82",
+   "elemento": "FEED",
+   "pilar": "INVOLUCRAR",
+   "subpilar": "Dinámicas",
+   "pregunta": "¿Utilizan dinámicas individuales para innovar internamente?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No hay dinámicas dedicadas a fomentar la innovación individual",
+    "Existen canales accesibles para la recepción de ideas",
+    "Existen foros donde pueden compartir ideas para innovar",
+    "Los colaboradores se pueden inscribir a un proyecto de innovación",
+    "Existen medios de acceso a metodologías de innovación"
+   ]
+  },
+  {
+   "id": "Q83",
+   "elemento": "FEED",
+   "pilar": "INVOLUCRAR",
+   "subpilar": "Dinámicas",
+   "pregunta": "¿Utilizan dinámicas de equipos para innovar internamente?",
+   "tipo": "Única",
+   "opciones": [
+    "No hay dinámicas dedicadas a fomentar la innovación en equipo",
+    "Se realizan sesiones para detectar los retos más relevantes del área",
+    "Se realizan talleres para hablar de innovación e inspirarse",
+    "Se realizan talleres para saber hacer innovación detectando y resolviendo necesidades",
+    "Se realizan talleres para saber detectar tendencias y reinventar soluciones existentes"
+   ]
+  },
+  {
+   "id": "Q84",
+   "elemento": "FEED",
+   "pilar": "INVOLUCRAR",
+   "subpilar": "Dinámicas",
+   "pregunta": "¿Utilizan dinámicas organizacionales para innovar en retos específicos?",
+   "tipo": "Única",
+   "opciones": [
+    "No hay dinámicas dedicadas a fomentar la innovación en la organización",
+    "Están claros y comunicados los retos más relevantes para la organización",
+    "Realizan conferencias a toda la organización para hablar de innovación e inspirarse",
+    "Realizan talleres abiertos a toda la organización para innovar en los retos organizacionales"
+   ]
+  },
+  {
+   "id": "Q85",
+   "elemento": "FEED",
+   "pilar": "INVOLUCRAR",
+   "subpilar": "Participación",
+   "pregunta": "¿La participación a proyectos es de manera voluntaria?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "Los colaboradores son asignados a proyectos",
+    "Están comunicados los beneficios de participar en proyectos",
+    "Se reduce la exigencia operativa de quienes participan en proyectos",
+    "Los colaboradores pueden decidir si participan en proyectos y en cuáles"
+   ]
+  },
+  {
+   "id": "Q86",
+   "elemento": "FEED",
+   "pilar": "INVOLUCRAR",
+   "subpilar": "Participación",
+   "pregunta": "¿Cuidan que los participantes de proyectos cuenten con el tiempo, conocimiento y herramientas necesarios para participar de forma efectiva y sostenible?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se considera el tiempo necesario para la participación.",
+    "Se da la opción a quienes no tienen la flexibilidad de participar en el proyecto de apoyarlo como experto en el tema",
+    "Son claros los requerimientos de tiempo necesario para participar en un proyecto",
+    "El sistema de innovación permite capacitar ágilmente a los colaboradores que se integran a los proyectos",
+    "Los participantes tienen un tiempo dedicado a su proyecto, aprobado por sus jefes."
+   ]
+  },
+  {
+   "id": "Q87",
+   "elemento": "FEED",
+   "pilar": "INVOLUCRAR",
+   "subpilar": "Participación",
+   "pregunta": "¿Existen recnocimientos por innovar?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se reconoce la innovación",
+    "Hay reconocimiento por medio de comunicación interna.",
+    "Hay incentivos no monetarios como días libres",
+    "Hay incentivos monetarios",
+    "Hay incentivos porcentuales relacionadas con el impacto"
+   ]
+  },
+  {
+   "id": "Q88",
+   "elemento": "FEED",
+   "pilar": "INVOLUCRAR",
+   "subpilar": "Participación",
+   "pregunta": "¿Contemplan el esfuerzo de participar en la innovación en la evaluación de desempeño?",
+   "tipo": "Única",
+   "opciones": [
+    "No se considera el esfuerzo en la evaluación de desempeño",
+    "Se considera en la evaluación de desempeño pero sin ningún beneficio",
+    "Se considera en la evaluación de desempeño y trae consigo beneficios"
+   ]
+  },
+  {
+   "id": "Q89",
+   "elemento": "FEED",
+   "pilar": "CONECTAR",
+   "subpilar": "Interno",
+   "pregunta": "¿Fomentan la empatía, confianza y colaboración entre diferentes departamentos y equipos para nutrir la cultura organizacional?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No hay esfuerzos visibles para mejorar la colaboración entre áreas",
+    "Hay eventos de team-building o de cohesión de equipos entre 2 o más áreas",
+    "Se hacen reuniones de alineación entre 2 o más áreas",
+    "Hay programas de desarrollo de habilidades blandas como comunicación y asertividad",
+    "Hay revisiones colaborativas de resultados entre áreas"
+   ]
+  },
+  {
+   "id": "Q90",
+   "elemento": "FEED",
+   "pilar": "CONECTAR",
+   "subpilar": "Interno",
+   "pregunta": "¿Promueven el flujo de comunicación y alineación horizontal y vertical continuamente?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se promueve",
+    "Existen medios oficiales de comunicación",
+    "Los colaboradores pueden comunicar libremente con los líderes",
+    "Los líderes de área se comunican de manera continua y natural entre ellos",
+    "Se evitan los esfuerzos duplicados gracias a la comunicación"
+   ]
+  },
+  {
+   "id": "Q91",
+   "elemento": "FEED",
+   "pilar": "CONECTAR",
+   "subpilar": "Externo",
+   "pregunta": "¿Se utilizan canales con clientes para conectar y obtener su feedback?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No hay medios de recepción de feedback",
+    "Utilizamos eventos como lanzamientos y/o pruebas con clientes para obtener su feedback",
+    "Utilizamos entrevistas frecuentes con clientes",
+    "Utilizamos encuestas de satisfacción",
+    "Utilizamos sesiones estilo focus group"
+   ]
+  },
+  {
+   "id": "Q92",
+   "elemento": "FEED",
+   "pilar": "CONECTAR",
+   "subpilar": "Externo",
+   "pregunta": "¿Se utilizan canales con aliados del ecosistema para conectar y obtener su feedback?",
+   "tipo": "Única",
+   "opciones": [
+    "No hay medios de recepción de feedback",
+    "Se asiste a eventos de networking",
+    "Creamos eventos alineados con la estrategia corporativa",
+    "Conectamos con instituciones educativas para tener insumos como investigaciones, talento y proyectos"
+   ]
+  },
+  {
+   "id": "Q93",
+   "elemento": "FEED",
+   "pilar": "CONECTAR",
+   "subpilar": "Sustentabilidad",
+   "pregunta": "¿Fomentan el vinculo socios, directores y colaborador con eventos para reconocer, agradecer y premiar?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No existen actividades de reconocimiento",
+    "Hay campañas de reconocimientos",
+    "Los altos mandos participan como mentores o stakeholders",
+    "Los socios están involucrados con las iniciativas actuales"
+   ]
+  },
+  {
+   "id": "Q94",
+   "elemento": "FEED",
+   "pilar": "CONECTAR",
+   "subpilar": "Sustentabilidad",
+   "pregunta": "¿Fomentan el vinculo de la empresa con comunidades aledañas buscanos un  beneficio social y ambiental?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se realizan acciones",
+    "Se participa en voluntariados y colaboraciones con ONGs",
+    "Existen indicadores de sustentabilidad ambiental",
+    "Se cumple con regulaciones locales e internacionales",
+    "Se incorpora la visión de los Objetivos de Desarrollo Sostenibles de organismos"
+   ]
+  },
+  {
+   "id": "Q95",
+   "elemento": "FEED",
+   "pilar": "CONECTAR",
+   "subpilar": "Sustentabilidad",
+   "pregunta": "¿Aseguran que los proyectos no resulten en una carga social y ambiental negativa para el futuro?",
+   "tipo": "Múltiple",
+   "opciones": [
+    "No se realizan evaluaciones de impacto ambiental",
+    "Se realizan evaluaciones de impacto ambiental",
+    "Se realizan esfuerzos para mitigar el impacto ambiental",
+    "Los proyectos buscan impactar al medio ambiente de forma positiva",
+    "Los líderes están involucrados para asegurar un impacto positivo y sostenible"
+   ]
+  }
+ ]
+}

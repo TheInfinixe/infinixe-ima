@@ -1,7 +1,15 @@
 "use client";
 import { useState, useEffect } from "react";
-import { db } from "../../lib/firebase";
+import { app, db } from "../../lib/firebase";
 import { collection, getDocs, orderBy, query, doc, updateDoc } from "firebase/firestore";
+import { GoogleAuthProvider, getAuth, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
+import { CLIENTE_COLUMNS, LEAD_COLUMNS, clienteRow, leadRow } from "../../lib/export-rows";
+
+// Solo cuentas @infinixe.co pueden ver el panel (las reglas de Firestore exigen lo mismo).
+const STAFF_DOMAIN = "@infinixe.co";
+const isStaff = (u) => !!u && u.emailVerified && (u.email || "").toLowerCase().endsWith(STAFF_DOMAIN);
+const AB = { a: { label: "A · $450", color: "#00E5FF" }, b: { label: "B · $350", color: "#B388FF" } };
+const fmtDate = (ts) => (ts?.toDate ? ts.toDate().toLocaleDateString("es-ES") : "—");
 
 const QUESTIONS = [
   { id:1, pillar:"STRATEGIZE", pilarEs:"DEFINIR", subpilar:"Visión", type:"M", q:"¿La empresa desglosa su visión en destinos estratégicos a corto, mediano y largo plazo bien definidos?", answers:[{text:"No hay objetivos definidos en plazos en la empresa",pts:0},{text:"Es claro lo que la empresa busca a corto plazo",pts:5},{text:"Es claro lo que la empresa busca a mediano plazo",pts:5},{text:"Es claro lo que la empresa busca a largo plazo",pts:5},{text:"La visión de la empresa es coherente en los 3 plazos definidos",pts:5},{text:"Los destinos estratégicos son sostenibles y evitan la obsolescencia",pts:5}]},
@@ -66,9 +74,105 @@ function CatBar({ label, v, m, color, unlocked }) {
   );
 }
 
-export default function AdminDashboard() {
+// ─── CLIENTES (compras confirmadas por el webhook de Stripe) ─────────────────
+function ClientesTable({ clientes, search, cd, loading }) {
+  const s = search.toLowerCase();
+  const rows = clientes.filter(c => !s || [c.name, c.email, c.company].some(v => (v || "").toLowerCase().includes(s)));
+  if (loading) return <p style={{ textAlign: "center", color: "rgba(255,255,255,0.4)" }}>Cargando datos...</p>;
+  const cols = "1fr 1.2fr 1fr 80px 80px 1fr 70px 90px";
+  const cell = { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" };
+  return (
+    <div style={{ ...cd, overflow: "hidden" }}>
+      <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+        <div style={{ minWidth: 900 }}>
+          <div style={{ display: "grid", gridTemplateColumns: cols, padding: "12px 16px", background: "rgba(255,255,255,0.04)", borderBottom: "1px solid rgba(255,255,255,0.08)", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.4)", letterSpacing: 0.5, gap: 8 }}>
+            <span>NOMBRE</span><span>EMAIL</span><span>EMPRESA</span>
+            <span style={{ textAlign: "center" }}>MONTO</span><span style={{ textAlign: "center" }}>VARIANTE</span>
+            <span>CAMPAÑA</span><span style={{ textAlign: "center" }} title="Correo de compra enviado">CORREO</span><span style={{ textAlign: "center" }}>FECHA</span>
+          </div>
+          {rows.length === 0 && (
+            <div style={{ padding: 40, textAlign: "center", color: "rgba(255,255,255,0.3)", fontSize: 13 }}>
+              {search ? "No se encontraron resultados" : "Aún no hay compras registradas. Aparecen solas cuando Stripe confirma un pago."}
+            </div>
+          )}
+          {rows.map((c, i) => (
+            <div key={c.id} style={{ display: "grid", gridTemplateColumns: cols, padding: "14px 16px", borderBottom: "1px solid rgba(255,255,255,0.04)", fontSize: 13, alignItems: "center", gap: 8, background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.015)" }}>
+              <span style={{ ...cell, color: "#fff", fontWeight: 500 }}>{c.name || "—"}</span>
+              <span style={{ ...cell, color: "rgba(255,255,255,0.5)" }}>{c.email || "—"}</span>
+              <span style={{ ...cell, color: "rgba(255,255,255,0.5)" }}>{c.company || "—"}</span>
+              <span style={{ textAlign: "center", fontWeight: 700, color: "#69F0AE" }}>{c.amount != null ? `$${c.amount}` : "—"}</span>
+              <span style={{ textAlign: "center", fontSize: 12, fontWeight: 700, color: c.variant ? AB[c.variant].color : "rgba(255,255,255,0.3)" }}>{c.variant ? c.variant.toUpperCase() : "—"}</span>
+              <span style={{ ...cell, color: "rgba(255,255,255,0.5)", fontSize: 12 }}>{c.attribution?.utm_campaign || c.attribution?.utm_source || "—"}</span>
+              <span style={{ textAlign: "center" }} title={c.purchaseEmailError || ""}>{c.purchaseEmailSentAt ? "✉️" : c.purchaseEmailError ? "⚠️" : "—"}</span>
+              <span style={{ textAlign: "center", fontSize: 11, color: "rgba(255,255,255,0.3)" }}>{fmtDate(c.createdAt)}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── LOGIN (Google, solo @infinixe.co) ───────────────────────────────────────
+export default function AdminGate() {
+  const [user, setUser] = useState(undefined);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const auth = getAuth(app);
+    return onAuthStateChanged(auth, async (u) => {
+      if (u && !isStaff(u)) {
+        setError(`${u.email} no tiene acceso. Entra con tu cuenta ${STAFF_DOMAIN}.`);
+        await signOut(auth);
+        setUser(null);
+        return;
+      }
+      setUser(u);
+    });
+  }, []);
+
+  const login = async () => {
+    setError("");
+    try {
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ hd: STAFF_DOMAIN.slice(1), prompt: "select_account" });
+      await signInWithPopup(getAuth(app), provider);
+    } catch (e) {
+      const msg = {
+        "auth/unauthorized-domain": "Este dominio no está autorizado en Firebase (Authentication → Configuración → Dominios autorizados).",
+        "auth/operation-not-allowed": "El acceso con Google no está habilitado en Firebase (Authentication → Método de acceso).",
+        "auth/popup-closed-by-user": "",
+      }[e.code];
+      setError(msg ?? "No se pudo iniciar sesión.");
+    }
+  };
+
+  const shell = { minHeight: "100vh", background: "#0a0e27", fontFamily: "'Outfit', sans-serif", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 };
+  if (user === undefined) return <div style={shell}><p style={{ color: "rgba(255,255,255,0.4)" }}>Cargando...</p></div>;
+  if (!user) {
+    return (
+      <div style={shell}>
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+        <div style={{ textAlign: "center", maxWidth: 360 }}>
+          <div style={{ fontSize: 10, letterSpacing: 4, color: "rgba(255,255,255,0.3)", marginBottom: 6 }}>INFINIXE IMA</div>
+          <h1 style={{ fontSize: 24, fontWeight: 800, margin: "0 0 20px" }}>Panel de administración</h1>
+          <button onClick={login} style={{ background: "linear-gradient(135deg,#00E5FF,#00B8D4)", color: "#0a0e27", border: "none", borderRadius: 12, padding: "14px 28px", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
+            Entrar con Google ({STAFF_DOMAIN})
+          </button>
+          {error && <p style={{ color: "#FF5252", fontSize: 13, marginTop: 14, lineHeight: 1.5 }}>{error}</p>}
+        </div>
+      </div>
+    );
+  }
+  return <AdminDashboard user={user} onLogout={() => signOut(getAuth(app))} />;
+}
+
+function AdminDashboard({ user, onLogout }) {
   const [assessments, setAssessments] = useState([]);
+  const [clientes, setClientes] = useState([]);
+  const [tab, setTab] = useState("leads");
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(null);
 
@@ -76,15 +180,44 @@ export default function AdminDashboard() {
     const fetchData = async () => {
       try {
         const snap = await getDocs(query(collection(db, "assessments"), orderBy("createdAt", "desc")));
-        const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setAssessments(data);
+        setAssessments(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       } catch (e) {
         console.error("Error fetching:", e);
+        setLoadError("No se pudieron cargar los leads (revisa las reglas de Firestore).");
+      }
+      try {
+        const snap = await getDocs(query(collection(db, "clientes"), orderBy("createdAt", "desc")));
+        setClientes(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      } catch (e) {
+        console.error("Error fetching clientes:", e);
       }
       setLoading(false);
     };
     fetchData();
   }, []);
+
+  // Excel con dos hojas (Leads y Clientes) con todos los datos cargados en el panel.
+  const downloadExcel = async () => {
+    const XLSX = await import("xlsx");
+    const wb = XLSX.utils.book_new();
+    const sheet = (columns, rows) => {
+      const ws = XLSX.utils.aoa_to_sheet([columns, ...rows]);
+      ws["!cols"] = columns.map(c => ({ wch: Math.max(12, c.length + 2) }));
+      return ws;
+    };
+    XLSX.utils.book_append_sheet(wb, sheet(LEAD_COLUMNS, assessments.map(a => leadRow(a.id, a))), "Leads");
+    XLSX.utils.book_append_sheet(wb, sheet(CLIENTE_COLUMNS, clientes.map(c => clienteRow(c.id, c))), "Clientes");
+    XLSX.writeFile(wb, `IMA-leads-y-clientes-${new Date().toISOString().slice(0, 10)}.xlsx`);
+  };
+
+  // Resumen del A/B de precio: quién vio cada precio, quién hizo clic en pagar y quién compró.
+  const abStats = ["a", "b"].map(v => {
+    const saw = assessments.filter(a => a.vslVariant === v);
+    const clicked = saw.filter(a => (a.checkoutClicks || 0) > 0);
+    const bought = clientes.filter(c => c.variant === v);
+    const pctOf = (n, d) => (d ? Math.round((n / d) * 100) : 0);
+    return { v, saw: saw.length, clicked: clicked.length, bought: bought.length, clickPct: pctOf(clicked.length, saw.length), buyPct: pctOf(bought.length, saw.length) };
+  });
 
   const filtered = assessments.filter(a => {
     const s = search.toLowerCase();
@@ -117,14 +250,51 @@ export default function AdminDashboard() {
               <div style={{ fontSize: 10, letterSpacing: 4, color: "rgba(255,255,255,0.3)", marginBottom: 4 }}>INFINIXE IMA</div>
               <h1 style={{ fontSize: 24, fontWeight: 800, margin: 0, color: "#fff" }}>Dashboard de Resultados</h1>
             </div>
-            <div style={{ display: "flex", gap: 10 }}>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
               <div style={{ ...cd, padding: "10px 16px", fontSize: 13, color: "#00E5FF" }}>
                 {assessments.length} participantes
               </div>
               <div style={{ ...cd, padding: "10px 16px", fontSize: 13, color: "#69F0AE" }}>
                 {assessments.filter(a => a.appointmentBooked).length} agendaron
               </div>
+              <div style={{ ...cd, padding: "10px 16px", fontSize: 13, color: "#FFD740" }}>
+                {clientes.length} clientes
+              </div>
+              <button onClick={onLogout} title={user.email} style={{ ...cd, padding: "10px 14px", fontSize: 12, color: "rgba(255,255,255,0.5)", cursor: "pointer", fontFamily: "inherit" }}>
+                Salir
+              </button>
             </div>
+          </div>
+
+          {loadError && <p style={{ color: "#FF5252", fontSize: 13, margin: "0 0 16px" }}>{loadError}</p>}
+
+          {/* A/B de precio del VSL */}
+          <div style={{ ...cd, padding: "16px 20px", marginBottom: 20 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: "rgba(255,255,255,0.45)", marginBottom: 12 }}>A/B DE PRECIO DEL VSL</div>
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+              {abStats.map(s => (
+                <div key={s.v} style={{ flex: 1, minWidth: 220, border: `1px solid ${AB[s.v].color}40`, borderRadius: 10, padding: "12px 16px" }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: AB[s.v].color, marginBottom: 8 }}>Variante {AB[s.v].label}</div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: "rgba(255,255,255,0.75)", gap: 10 }}>
+                    <span>Vieron<br /><strong style={{ fontSize: 20, color: "#fff" }}>{s.saw}</strong></span>
+                    <span>Clic en pagar<br /><strong style={{ fontSize: 20, color: "#fff" }}>{s.clicked}</strong> <span style={{ color: "rgba(255,255,255,0.4)" }}>{s.clickPct}%</span></span>
+                    <span>Compraron<br /><strong style={{ fontSize: 20, color: "#fff" }}>{s.bought}</strong> <span style={{ color: "rgba(255,255,255,0.4)" }}>{s.buyPct}%</span></span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
+            {[["leads", `Leads (${assessments.length})`], ["clientes", `Clientes (${clientes.length})`]].map(([key, label]) => (
+              <button key={key} onClick={() => setTab(key)} style={{ border: "none", borderRadius: 8, padding: "8px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", background: tab === key ? "linear-gradient(135deg,#00E5FF,#00B8D4)" : "rgba(255,255,255,0.06)", color: tab === key ? "#0a0e27" : "rgba(255,255,255,0.6)" }}>
+                {label}
+              </button>
+            ))}
+            <button onClick={downloadExcel} disabled={loading} style={{ marginLeft: "auto", border: "1px solid rgba(105,240,174,0.35)", borderRadius: 8, padding: "8px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", background: "rgba(105,240,174,0.12)", color: "#69F0AE" }}>
+              ⬇ Descargar Excel
+            </button>
           </div>
 
           {/* Search */}
@@ -132,6 +302,9 @@ export default function AdminDashboard() {
             <input style={inp} placeholder="🔍 Buscar por nombre, correo o empresa..." value={search} onChange={e => setSearch(e.target.value)} />
           </div>
 
+          {tab === "clientes" && <ClientesTable clientes={clientes} search={search} cd={cd} loading={loading} />}
+
+          {tab === "leads" && (<>
           {/* Stats summary */}
           <div style={{ display: "flex", gap: 12, marginBottom: 24, flexWrap: "wrap" }}>
             {Object.entries(PILLAR_COLORS).map(([p, c]) => {
@@ -157,14 +330,17 @@ export default function AdminDashboard() {
           {!loading && (
             <div style={{ ...cd, overflow: "hidden" }}>
               <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
-                <div style={{ minWidth: 750 }}>
+                <div style={{ minWidth: 1000 }}>
               {/* Header row */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 80px 80px 70px 100px", padding: "12px 16px", background: "rgba(255,255,255,0.04)", borderBottom: "1px solid rgba(255,255,255,0.08)", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.4)", letterSpacing: 0.5, gap: 8 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 80px 70px 60px 55px 60px 60px 90px", padding: "12px 16px", background: "rgba(255,255,255,0.04)", borderBottom: "1px solid rgba(255,255,255,0.08)", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.4)", letterSpacing: 0.5, gap: 8 }}>
                 <span>NOMBRE</span>
                 <span>EMAIL</span>
                 <span>EMPRESA</span>
                 <span style={{ textAlign: "center" }}>NIVEL</span>
                 <span style={{ textAlign: "center" }}>PUNTAJE</span>
+                <span style={{ textAlign: "center" }} title="Precio que vio en el VSL (A/B)">PRECIO</span>
+                <span style={{ textAlign: "center" }} title="Hizo clic en «Desbloquear»">PAGAR</span>
+                <span style={{ textAlign: "center" }}>COMPRÓ</span>
                 <span style={{ textAlign: "center" }}>AGENDÓ</span>
                 <span style={{ textAlign: "center" }}>FECHA</span>
               </div>
@@ -184,7 +360,7 @@ export default function AdminDashboard() {
                   <div key={a.id}
                     onClick={() => setSelected(a)}
                     style={{
-                      display: "grid", gridTemplateColumns: "1fr 1fr 1fr 80px 80px 70px 100px", padding: "14px 16px",
+                      display: "grid", gridTemplateColumns: "1fr 1fr 1fr 80px 70px 60px 55px 60px 60px 90px", padding: "14px 16px",
                       borderBottom: "1px solid rgba(255,255,255,0.04)", cursor: "pointer",
                       transition: "background 0.2s", fontSize: 13, alignItems: "center", gap: 8,
                       background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.015)",
@@ -197,6 +373,9 @@ export default function AdminDashboard() {
                     <span style={{ color: "rgba(255,255,255,0.5)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.company || "—"}</span>
                     <span style={{ textAlign: "center", fontSize: 11, fontWeight: 600, color: pct >= 68 ? "#69F0AE" : pct >= 34 ? "#FFD740" : "#FF5252" }}>{lvl}</span>
                     <span style={{ textAlign: "center", fontWeight: 700, color: "#00E5FF", fontFamily: "'Space Mono', monospace" }}>{pct}%</span>
+                    <span style={{ textAlign: "center", fontSize: 12, fontWeight: 700, color: a.vslVariant ? AB[a.vslVariant]?.color : "rgba(255,255,255,0.25)" }}>{a.vslPrice ? `$${a.vslPrice}` : "—"}</span>
+                    <span style={{ textAlign: "center", fontSize: 13 }}>{a.checkoutClicks ? "👆" : "—"}</span>
+                    <span style={{ textAlign: "center", fontSize: 14 }}>{a.purchased ? "💳" : "—"}</span>
                     <span style={{ textAlign: "center", fontSize: 14 }}>{booked ? "✅" : "—"}</span>
                     <span style={{ textAlign: "center", fontSize: 11, color: "rgba(255,255,255,0.3)" }}>{date}</span>
                   </div>
@@ -206,6 +385,7 @@ export default function AdminDashboard() {
               </div>
             </div>
           )}
+          </>)}
         </div>
       </div>
     );
@@ -240,6 +420,15 @@ export default function AdminDashboard() {
               <div style={{ fontSize: 12, fontWeight: 600, color: pct >= 68 ? "#69F0AE" : pct >= 34 ? "#FFD740" : "#FF5252" }}>{lvl}</div>
             </div>
           </div>
+        </div>
+
+        {/* Embudo: precio del A/B, pago, seguimiento y anuncio de origen */}
+        <div style={{ ...cd, padding: "16px 20px", marginBottom: 20, display: "flex", gap: 20, flexWrap: "wrap", fontSize: 13, color: "rgba(255,255,255,0.6)" }}>
+          <span>Precio visto: <strong style={{ color: a.vslVariant ? AB[a.vslVariant].color : "#fff" }}>{a.vslVariant ? AB[a.vslVariant].label : "No vio el VSL"}</strong></span>
+          <span>Clics en pagar: <strong style={{ color: "#fff" }}>{a.checkoutClicks || 0}</strong></span>
+          <span>Compró: <strong style={{ color: a.purchased ? "#69F0AE" : "#fff" }}>{a.purchased ? `Sí${a.purchaseAmount ? ` · $${a.purchaseAmount}` : ""}` : "No"}</strong></span>
+          <span>Seguimiento: <strong style={{ color: "#fff" }}>{a.unsubscribed ? "Se dio de baja" : a.followUpSentAt ? `Enviado ${fmtDate(a.followUpSentAt)}` : "—"}</strong></span>
+          <span>Origen: <strong style={{ color: "#fff" }}>{[a.attribution?.utm_source, a.attribution?.utm_campaign, a.attribution?.utm_content].filter(Boolean).join(" · ") || "—"}</strong></span>
         </div>
 
         {/* Appointment status */}

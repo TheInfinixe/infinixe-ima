@@ -25,8 +25,10 @@ const RIESGO_EN = [
   "At the Sustainable level the challenge is sustaining it: keeping the innovative mindset alive and expanding the impact to the ecosystem.",
 ];
 
-// --- Fallback: legacy EmailJS flow (kept as-is, no attachment) --------
-async function sendViaEmailJS({ name, email, company, results, lang, isEn, levelName, strategizePct, managePct, feedPct }) {
+// --- Fallback: EmailJS (no attachment) ---------------------------------
+// Sends the same data as the main Gmail email so EmailJS can use the v2 templates
+// (emailjs-templates/v2-template-*.html), whose CTA goes to the VSL.
+async function sendViaEmailJS({ name, email, company, results, lang, isEn, levelName, strategizePct, managePct, feedPct, riesgo, vslUrl }) {
   const templateParams = {
     user_name: name,
     user_email: email,
@@ -40,8 +42,8 @@ async function sendViaEmailJS({ name, email, company, results, lang, isEn, level
     estado: results.estado,
     paso: results.paso,
     lang: lang || "es",
-    // CTA link for the neutral cold-outreach template
-    calendly_url: "https://calendly.com/infinixe/sesion-con-infinixe-1",
+    riesgo: riesgo,
+    vsl_url: vslUrl,
   };
 
   // Use the English template when the user took the assessment in English
@@ -79,7 +81,7 @@ async function sendViaEmailJS({ name, email, company, results, lang, isEn, level
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { name, email, company, results, lang } = body;
+    const { name, email, company, results, lang, rid } = body;
     const isEn = lang === "en";
 
     const levelNamesEs = ["INICIAL", "REACTIVA", "ESTRUCTURADA", "SISTEMATIZADA", "AMBIDIESTRA", "SOSTENIBLE"];
@@ -97,7 +99,9 @@ export async function POST(request) {
     const firstName = String(name || "").trim().split(/\s+/)[0] || "";
     const vslUrl =
       (process.env.NEXT_PUBLIC_VSL_URL || "https://infinixe-ima.vercel.app/vsl") +
-      `?lvl=${levelNum}&n=${encodeURIComponent(firstName)}`;
+      `?lvl=${levelNum}&n=${encodeURIComponent(firstName)}` +
+      // id del lead (Firestore) -> el VSL lo pasa a Stripe como client_reference_id
+      (typeof rid === "string" && /^[A-Za-z0-9_-]{1,200}$/.test(rid) ? `&rid=${rid}` : "");
 
     // ---------------- Primary route: Gmail SMTP + PDF attachment ------
     const gmailUser = process.env.GMAIL_USER;
@@ -192,6 +196,8 @@ export async function POST(request) {
       strategizePct,
       managePct,
       feedPct,
+      riesgo,
+      vslUrl,
     });
     console.log(`send-results: sent via EmailJS fallback (emailSent=${emailSent})`);
 
