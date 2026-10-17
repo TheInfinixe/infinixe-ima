@@ -28,6 +28,7 @@ function Content() {
       metaParams: { content_name: "IMA Completo + sesión 1:1", value: value || 0, currency: "USD" },
       gaEvent: "purchase",
       gaParams: { transaction_id: sessionId || undefined, value: value || 0, currency: "USD", items: [{ item_name: "IMA Completo + sesión 1:1", price: value || 0 }] },
+      linkedin: { conversion: "purchase", value: value || undefined, eventId: sessionId || undefined },
     });
   }, [params]);
 

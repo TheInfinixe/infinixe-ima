@@ -117,6 +117,7 @@ function VslContent({ price, stripeUrl, variant }) {
       metaParams: { content_name: "IMA Completo + sesión 1:1", value: price, currency: "USD" },
       gaEvent: "begin_checkout",
       gaParams: { variant, value: price, currency: "USD" },
+      linkedin: { conversion: "checkout" },
     });
   };
 

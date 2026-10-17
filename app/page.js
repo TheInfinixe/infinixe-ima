@@ -499,6 +499,7 @@ export default function Home() {
       metaParams: { content_name: "IMA assessment", status: `nivel_${lvl.level}` },
       gaEvent: "assessment_complete",
       gaParams: { level: lvl.level, overall_pct: oPct, lang },
+      linkedin: { conversion: "lead", eventId: id || undefined },
     });
     // For the email, send the description text in the language the user chose.
     const emailResults = { pillarScores: pl, overallPct: oPct, levelNum: lvl.level, estado: lang === "en" ? lvl.estadoEn : lvl.estado, paso: lang === "en" ? lvl.pasoEn : lvl.paso };
