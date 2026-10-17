@@ -18,7 +18,7 @@ Todo el sistema pasa a las cuentas de Chris. Este es el **documento maestro**: e
 3. Qué se guarda y dónde
 4. Correos automáticos
 5. A/B de precio
-6. Medición (Meta Pixel y Google Analytics)
+6. Medición (Meta Pixel, Google Analytics y LinkedIn)
 7. Panel `/admin`
 8. Setup de Chris, paso a paso
 9. Migración: quién hace qué
@@ -43,7 +43,7 @@ Todo el sistema pasa a las cuentas de Chris. Este es el **documento maestro**: e
 | Video del VSL | MP4 H.264, 63 MB | Vercel Blob, store `infinixe-vsl-video` | Isabel |
 | Pagos | 2 Payment Links ($450 y $350) + webhook | Stripe | Chris |
 | Correos | Resultados, compra confirmada, seguimiento | Gmail SMTP (`GMAIL_USER`) · respaldo EmailJS | Cuenta configurada hoy |
-| Medición | Meta Pixel `639402398659793` · GA4 `G-PS5BHPJBFL` | Meta / Google | Infinixe |
+| Medición | Meta Pixel `639402398659793` · GA4 `G-PS5BHPJBFL` · LinkedIn Insight Tag `10912369` | Meta / Google / LinkedIn Campaign Manager (cuenta «Infinixe EUR») | Infinixe |
 | Tarea diaria | Correo de seguimiento a 24 h | Vercel Cron (`vercel.json`) | Va con el proyecto Vercel |
 | **IMA Completo** | 95 preguntas que responde el equipo del cliente tras comprar | Repo **`isabel-PLYG/Infinixe-ima-fullversion`** (privado) · Vercel **`infinixe-ima-fullversion`** · Firebase **`infinixe-ima-fullversion`** | Isabel |
 | Exportaciones del IMA Completo | Un Excel por respuesta | Google Drive: unidad compartida *Infinixe › PlayGround › IMA › Resultados* | Infinixe |
@@ -139,18 +139,21 @@ Salen por **Gmail SMTP** con la cuenta de `GMAIL_USER` (remitente visible «Infi
 
 ---
 
-## 6. Medición (Meta Pixel y Google Analytics)
+## 6. Medición (Meta Pixel, Google Analytics y LinkedIn)
 
-| Paso | Meta Pixel | GA4 | Dónde se dispara |
-|---|---|---|---|
-| Clic en botón de la landing | `Lead` | `generate_lead` | Landing |
-| Envía resultados del test | `CompleteRegistration` | `assessment_complete` | `app/page.js` |
-| Abre el VSL | `ViewContent` | `vsl_view` | `app/vsl/VslPage.js` |
-| Aparece la oferta | — | `vsl_offer_shown` | VSL |
-| Clic en «Desbloquear» | `InitiateCheckout` | `begin_checkout` | VSL |
-| Vuelve de Stripe | `Purchase` | `purchase` | `app/gracias/` (no se duplica si recarga) |
+| Paso | Meta Pixel | GA4 | LinkedIn (conversión) | Dónde se dispara |
+|---|---|---|---|---|
+| Clic en botón de la landing | `Lead` | `generate_lead` | (lo define la landing) | Landing |
+| Envía resultados del test | `CompleteRegistration` | `assessment_complete` | **IMA – Lead (test completado)** `32051129` | `app/page.js` |
+| Abre el VSL | `ViewContent` | `vsl_view` | — | `app/vsl/VslPage.js` |
+| Aparece la oferta | — | `vsl_offer_shown` | — | VSL |
+| Clic en «Desbloquear» | `InitiateCheckout` | `begin_checkout` | **IMA – Inicio de pago** `32051137` | VSL |
+| Vuelve de Stripe | `Purchase` | `purchase` | **IMA – Compra** `32051145` (valor real en USD) | `app/gracias/` (no se duplica si recarga) |
 
-- IDs en `NEXT_PUBLIC_META_PIXEL_ID` y `NEXT_PUBLIC_GA_ID` (los mismos de la landing). Sin esas variables no se carga nada (recomendado en local).
+- IDs en `NEXT_PUBLIC_META_PIXEL_ID`, `NEXT_PUBLIC_GA_ID` y `NEXT_PUBLIC_LINKEDIN_PARTNER_ID` (los mismos de la landing). Sin esas variables no se carga nada (recomendado en local).
+- LinkedIn: el Insight Tag se carga en todas las páginas del funnel y cada conversión es de tipo «Específico del evento» en Campaign Manager (cuenta **Infinixe EUR**, `513479858`). Los ids van en `NEXT_PUBLIC_LINKEDIN_CONV_LEAD`, `_CHECKOUT` y `_PURCHASE`; si uno está vacío, esa conversión no se envía. La compra manda el valor real (`conversion_value` + `currency: USD`) y el id de la sesión de Stripe como `event_id`; el lead manda el id del lead.
+- La landing ya reenvía `li_fat_id` (clic de LinkedIn) al assessment junto con las UTMs, así que LinkedIn reconoce a la persona entre los dos dominios.
+- ⚠️ La conversión `31081537` («Conv – Generador de ideas») la disparan hoy la landing del IMA y The Signal. Conviene que la landing use una conversión propia; eso lo cambia quien mantiene la landing.
 - El nombre de la persona viaja en `?n=` para personalizar el VSL y **se quita de la URL antes de medir**: no llega a Meta ni a Google.
 
 ---
@@ -321,6 +324,8 @@ Cargar en Production y Preview. La plantilla está en `.env.local.example`.
 | `STRIPE_WEBHOOK_SECRET` | Stripe → Webhooks → Signing secret | Sí (activa clientes, correo de compra y seguimiento) |
 | `NEXT_PUBLIC_META_PIXEL_ID` | `639402398659793` | Sí |
 | `NEXT_PUBLIC_GA_ID` | `G-PS5BHPJBFL` | Sí |
+| `NEXT_PUBLIC_LINKEDIN_PARTNER_ID` | `10912369` (Insight Tag de la cuenta Infinixe EUR) | Sí |
+| `NEXT_PUBLIC_LINKEDIN_CONV_LEAD`, `_CHECKOUT`, `_PURCHASE` | `32051129`, `32051137`, `32051145` (Campaign Manager → Seguimiento de las conversiones) | Sí |
 | `NEXT_PUBLIC_VSL_VIDEO_SRC` | URL del video en el Blob store | Sí |
 | `BLOB_READ_WRITE_TOKEN` | Se crea sola al conectar el Blob store | Automática |
 | `CRON_SECRET`, `UNSUBSCRIBE_SECRET` | `openssl rand -hex 32` (uno distinto para cada una) | Sí |
@@ -417,7 +422,7 @@ npm run dev
 # Vistas previas de correos y PDF: carpeta emails/
 ```
 - Copiar `.env.local.example` a `.env.local`.
-- Dejar vacías `NEXT_PUBLIC_META_PIXEL_ID` y `NEXT_PUBLIC_GA_ID` para no enviar eventos de prueba.
+- Dejar vacías `NEXT_PUBLIC_META_PIXEL_ID`, `NEXT_PUBLIC_GA_ID` y `NEXT_PUBLIC_LINKEDIN_PARTNER_ID` para no enviar eventos de prueba.
 - Las rutas `/api/*` necesitan `FIREBASE_SERVICE_ACCOUNT` y las credenciales de Gmail.
 
 ## 16. Continuar con Claude Code
